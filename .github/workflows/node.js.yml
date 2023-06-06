@@ -1,0 +1,43 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "prod" ]
+
+jobs:
+  build:
+
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+        # maybe 19.x is broken?
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - name: create env file
+      run: |
+        touch .env
+        echo enviromentIsDev=false >> .env
+        echo enviromentIsProd=true >> .env
+        echo botToken=${{ secrets.BOT_TOKEN }} >> .env
+        echo applicationId=${{ secrets.APPLICATION_ID }} >> .env
+        echo guildId=${{ secrets.GUILD_ID }} >> .env
+        echo bcRestToken=${{ secrets.BC_REST_TOKEN }} >> .env
+        echo bcRestURL=${{ secrets.BC_REST_URL }} >> .env
+    - run: npm ci
+    - run: npm run test --if-present
+    - run: npm run build
+    # - name: create temporal career picker select menu cache
+    #   run: |
+    #     mv ./src/generated/selectMenus/tmpCareer.json ./dist/generated/selectMenus/+generated/PICK_ROLES_career.cache.json
+    - run: pm2 reload student-discord-bot

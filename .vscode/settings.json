@@ -1,0 +1,17 @@
+{
+    "workbench.colorCustomizations": {
+        "titleBar.activeBackground": "#3e639b",
+        "titleBar.inactiveBackground": "#141e30"
+    },
+    "editor.tabSize": 4,
+    "files.autoSaveDelay": 60000,
+    "files.trimFinalNewlines": true,
+    "typescript.format.insertSpaceAfterCommaDelimiter": true,
+    "typescript.preferences.quoteStyle": "single",
+    "javascript.preferences.quoteStyle": "single",
+    "javascript.format.semicolons": "insert",
+    "typescript.format.semicolons": "insert",
+    "search.exclude": {
+        "package-lock.json": true,
+    }
+}
