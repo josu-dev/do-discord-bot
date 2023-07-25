@@ -9,9 +9,6 @@ declare global {
             applicationId: string;
 
             guildId: string;
-
-            bcRestToken: string;
-            bcRestURL: string;
         }
     }
 }

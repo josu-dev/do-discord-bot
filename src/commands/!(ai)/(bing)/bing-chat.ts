@@ -224,7 +224,7 @@ async function resolveQuestion(data: QuestionData, fresh: boolean = false) {
             body: data.cachedBodyRequest,
             headers: {
                 'Content-Type': 'application/json',
-                'Access-Token': process.env.bcRestToken,
+                'Access-Token': process.env.bcRestToken!,
                 'charset': 'utf-8'
             }
         }

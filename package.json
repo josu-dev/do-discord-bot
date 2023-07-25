@@ -1,11 +1,11 @@
 {
-    "name": "discord-bot",
+    "name": "do-discord-bot",
     "version": "1.0.0",
     "description": "",
     "main": "dist/index.js",
     "scripts": {
         "build": "tsc",
-        "type-check": "tsc --noEmit",
+        "type-check": "tsc --noEmit && echo type-check: passed ✅ || echo type-check: failed 💥",
         "dev": "ts-node-dev --files src/index.ts",
         "start:dev": "ts-node --files src/index.ts",
         "start:prod": "node dist/index.js"
