@@ -65,6 +65,7 @@ export const GUILD = {
     ROLES: {
         ADMIN: '1075765516007899196',
         MOD: '1075784143893430382',
+        VERIFIED: '1133910615845523536',
     },
     INVITE: {
         CODE: 'Jur4R4Jcpx',

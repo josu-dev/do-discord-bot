@@ -9,7 +9,7 @@ import { SingleFileCommandDefinition } from '../+type';
 //     ? value.toString()
 //     : value
 // 
-// @ts-ignore: Unreachable code error
+// @ts-expect-error
 BigInt.prototype.toJSON = function () {
     return this.toString();
 };
