@@ -5,6 +5,9 @@ import type { TextItem, TextContent, PDFDocumentProxy } from "pdfjs-dist/types/s
 import jsQR from "jsqr";
 import * as cheerio from 'cheerio';
 import { Replace } from '../../lib/utilType';
+import prisma from '../../db';
+import { GUILD } from '../../globalConfigs';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 
 const commandData = new SlashCommandBuilder()
@@ -23,9 +26,15 @@ const commandData = new SlashCommandBuilder()
 
 const VALID_CERTIFICATE_DURATION = 4 * 60 * 60 * 1000;
 
+const CERTIFICATE_IMAGE_QUANTITY = 3;
+
 const QR_IMAGE_INDEX = 1;
 
-const VALIDATION_URL = `https://guarani-informatica.unlp.edu.ar/validador_certificados/validar`;
+const VALIDATION_URL_DOMAINNAME = `https://guarani-informatica.unlp.edu.ar`;
+
+const VALIDATION_URL = `${VALIDATION_URL_DOMAINNAME}/validador_certificados/validar`;
+
+const VERIFIED_ROLE_ID = process.env.enviromentIsDev === 'true' ? '1133933055422246914' : GUILD.ROLES.VERIFIED;
 
 
 async function validateCertificate(code: string) {
@@ -119,17 +128,48 @@ export default (() => {
     return {
         data: commandData,
         async execute({ interaction }) {
+            if (interaction.member.roles.resolve(VERIFIED_ROLE_ID)) {
+                // NOTE: update error in spanish
+                return interaction.reply({
+                    content: `You are already verified`,
+                    ephemeral: true,
+                });
+            }
+
             await interaction.deferReply({ ephemeral: true, fetchReply: true });
 
             const certificate = interaction.options.getAttachment('regularity_certificate', true);
+            if (!certificate.url.endsWith('.pdf')) {
+                // NOTE: update error in spanish
+                return interaction.editReply({
+                    content: `Invalid file format, only PDF is supported`,
+                });
+            }
 
-            const pdf: PDFDocumentProxy = await pdfjsLib.getDocument(certificate.url).promise;
+            let pdf: PDFDocumentProxy;
+            try {
+                pdf = await pdfjsLib.getDocument(certificate.url).promise;
+            }
+            catch (error) {
+                // NOTE: update error in spanish not pdf or bad pdf
+                return interaction.editReply({
+                    content: `Error ${error}`,
+                });
+            }
 
             const pdfPage = await pdf.getPage(1);
 
             const textContent = await pdfPage.getTextContent({ includeMarkedContent: false }) as unknown as Replace<TextContent, 'items', TextItem[]>;
 
-            const emitionDate = reconstructARGDate(textContent.items.at(-1)?.str!).valueOf();
+            const possibleEmitionDate = textContent.items.at(-1)?.str;
+            if (!possibleEmitionDate || !/\d+\/\d+\/\d+ \d+:\d+:\d+/.test(possibleEmitionDate)) {
+                return interaction.editReply({
+                    // NOTE: update error in spanish
+                    content: `Invalid pdf`,
+                });
+            }
+
+            const emitionDate = reconstructARGDate(possibleEmitionDate).valueOf();
 
             if (Date.now() > (emitionDate + VALID_CERTIFICATE_DURATION)) {
                 return interaction.editReply({
@@ -145,6 +185,13 @@ export default (() => {
                 if (operators.fnArray[i] === pdfjsLib.OPS.paintImageXObject) {
                     rawImgOperator.push(i);
                 }
+            }
+
+            if (rawImgOperator.length !== CERTIFICATE_IMAGE_QUANTITY) {
+                return interaction.editReply({
+                    // NOTE: update error in spanish
+                    content: `Invalid pdf`,
+                });
             }
 
             // now you need the filename, in this example I just picked the first one from my array, your array may be empty, but I knew for sure in page 7 there was an image... in your actual code you would use loops, such info is in the argsArray, the first arg is the filename, second arg is the width and height, but the filename will suffice here
@@ -170,25 +217,74 @@ export default (() => {
                     }
 
                     // https://github.com/cozmo/jsQR
-                    const qrCode = jsQR(data, arg.width, arg.height);
+                    const qrCode = jsQR(data, arg.width, arg.height, {});
                     if (!qrCode) {
                         return interaction.editReply({
+                            // NOTE: update error in spanish
                             content: `QR Code not found`,
                         });
                     }
 
-                    const certificateCode = (qrCode.chunks.at(-1) as any).text;
+                    if (!qrCode.data.startsWith(VALIDATION_URL_DOMAINNAME)) {
+                        return interaction.editReply({
+                            // NOTE: update error in spanish
+                            content: `Invalid QR Code`,
+                        });
+                    }
+
+                    const certificateCode = qrCode.data.split('/').at(-1)!;
 
                     const validationResult = await validateCertificate(certificateCode);
                     if (!validationResult.valid) {
                         return interaction.editReply({
+                            // NOTE: update error in spanish
                             content: `Error ${validationResult.status}`,
                         });
                     }
 
                     const parseResult = parseHTML(validationResult.text);
 
+                    try {
+                        const member = await prisma.member.create({
+                            data: {
+                                member_id: interaction.member.id,
+                                legajo: parseResult.legajo!,
+                                dni: parseResult.dni!,
+                            }
+                        });
+                    }
+                    catch (error) {
+                        if (error instanceof PrismaClientKnownRequestError) {
+                            if (error.code === 'P2002') {
+                                return interaction.editReply({
+                                    // NOTE: update error in spanish
+                                    content: `You are already verified`,
+                                });
+                                // if ((error.meta?.target as any).includes('legajo')) {
+                                //     return interaction.editReply({
+                                //         // NOTE: update error in spanish
+                                //         content: `Legajo already registered`,
+                                //     });
+                                // }
+                                // if ((error.meta?.target as any).includes('member_id')) {
+                                //     return interaction.editReply({
+                                //         // NOTE: update error in spanish
+                                //         content: `You are already verified`,
+                                //     });
+                                // }
+                            }
+                            return interaction.editReply({
+                                // NOTE: update error in spanish
+                                content: `Error ${error.code} db error`,
+                            });
+                        }
+                        throw error;
+                    }
+
+                    await interaction.member.roles.add(VERIFIED_ROLE_ID);
+
                     return interaction.editReply({
+                        // Note: update success in spanish
                         content: `Successfully verified\n\`\`\`json\n${JSON.stringify(parseResult, null, 2)}\n\`\`\``,
                     });
                 }
