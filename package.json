@@ -7,6 +7,7 @@
         "build": "tsc && echo build: succesfull ✅ || echo build: failed 💥",
         "type-check": "tsc --noEmit && echo type-check: passed ✅ || echo type-check: failed 💥",
         "dev": "ts-node-dev --files src/index.ts",
+        "start": "tsc && npm run start:prod",
         "start:dev": "ts-node --files src/index.ts",
         "start:prod": "node dist/index.js",
         "postinstall": "npx prisma generate"
