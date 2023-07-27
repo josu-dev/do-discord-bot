@@ -36,3 +36,7 @@ export function addEphemeralOption(anyCommandBuilder: Omit<SlashCommandBuilder, 
     );
     return anyCommandBuilder;
 }
+
+export function jsonCodeblock(obj: unknown, space: number = 2): `\`\`\`json\n${string}\`\`\`\n` {
+    return `\`\`\`json\n${JSON.stringify(obj, null, space)}\`\`\`\n`;
+}

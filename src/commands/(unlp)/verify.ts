@@ -1,6 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { SingleFileCommandDefinition } from '../+type';
-const pdfjsLib = require("pdfjs-dist/legacy/build/pdf.js");
 import type { TextItem, TextContent, PDFDocumentProxy } from "pdfjs-dist/types/src/display/api";
 import jsQR from "jsqr";
 import * as cheerio from 'cheerio';
@@ -8,6 +7,7 @@ import { Replace } from '../../lib/utilType';
 import prisma from '../../db';
 import { GUILD } from '../../globalConfigs';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { VerbosityLevel, getDocument, OPS } from 'pdfjs-dist';
 
 
 const commandData = new SlashCommandBuilder()
@@ -30,7 +30,7 @@ const CERTIFICATE_IMAGE_QUANTITY = 3;
 
 const QR_IMAGE_INDEX = 1;
 
-const VALIDATION_URL_DOMAINNAME = `https://guarani-informatica.unlp.edu.ar`;
+const VALIDATION_URL_DOMAINNAME = `https://www.guarani-informatica.unlp.edu.ar`;
 
 const VALIDATION_URL = `${VALIDATION_URL_DOMAINNAME}/validador_certificados/validar`;
 
@@ -129,9 +129,8 @@ export default (() => {
         data: commandData,
         async execute({ interaction }) {
             if (interaction.member.roles.resolve(VERIFIED_ROLE_ID)) {
-                // NOTE: update error in spanish
                 return interaction.reply({
-                    content: `You are already verified`,
+                    content: `Ya estas verificado, no puedes verificarte de nuevo`,
                     ephemeral: true,
                 });
             }
@@ -140,20 +139,22 @@ export default (() => {
 
             const certificate = interaction.options.getAttachment('regularity_certificate', true);
             if (!certificate.url.endsWith('.pdf')) {
-                // NOTE: update error in spanish
                 return interaction.editReply({
-                    content: `Invalid file format, only PDF is supported`,
+                    content: `Formato de certificado invalido, debe ser PDF`,
                 });
             }
 
             let pdf: PDFDocumentProxy;
             try {
-                pdf = await pdfjsLib.getDocument(certificate.url).promise;
+                pdf = await getDocument({
+                    url: certificate.url,
+                    verbosity: VerbosityLevel.ERRORS
+                }).promise;
             }
             catch (error) {
-                // NOTE: update error in spanish not pdf or bad pdf
+                console.error(error);
                 return interaction.editReply({
-                    content: `Error ${error}`,
+                    content: `Ocurrio un error al procesar el certificado adjuntado`,
                 });
             }
 
@@ -164,8 +165,7 @@ export default (() => {
             const possibleEmitionDate = textContent.items.at(-1)?.str;
             if (!possibleEmitionDate || !/\d+\/\d+\/\d+ \d+:\d+:\d+/.test(possibleEmitionDate)) {
                 return interaction.editReply({
-                    // NOTE: update error in spanish
-                    content: `Invalid pdf`,
+                    content: `El certificado no cumple con el formato esperado`,
                 });
             }
 
@@ -173,7 +173,7 @@ export default (() => {
 
             if (Date.now() > (emitionDate + VALID_CERTIFICATE_DURATION)) {
                 return interaction.editReply({
-                    content: `Certificate expired, please request a new one and use it within 4 hours`,
+                    content: `El certificado adjuntado ya no es valido, intente con uno mas reciente`,
                 });
             }
 
@@ -182,15 +182,14 @@ export default (() => {
             // this is for the paintImageXObject one, there are other ones, like the paintJpegImage which I assume should work the same way, this gives me the whole list of indexes of where an img was inserted
             const rawImgOperator: number[] = [];
             for (let i = 0; i < operators.fnArray.length; i++) {
-                if (operators.fnArray[i] === pdfjsLib.OPS.paintImageXObject) {
+                if (operators.fnArray[i] === OPS.paintImageXObject) {
                     rawImgOperator.push(i);
                 }
             }
 
             if (rawImgOperator.length !== CERTIFICATE_IMAGE_QUANTITY) {
                 return interaction.editReply({
-                    // NOTE: update error in spanish
-                    content: `Invalid pdf`,
+                    content: `El certificado no cumple con el formato esperado`,
                 });
             }
 
@@ -220,15 +219,13 @@ export default (() => {
                     const qrCode = jsQR(data, arg.width, arg.height, {});
                     if (!qrCode) {
                         return interaction.editReply({
-                            // NOTE: update error in spanish
-                            content: `QR Code not found`,
+                            content: `El certificado no cumple con el formato esperado`,
                         });
                     }
 
                     if (!qrCode.data.startsWith(VALIDATION_URL_DOMAINNAME)) {
                         return interaction.editReply({
-                            // NOTE: update error in spanish
-                            content: `Invalid QR Code`,
+                            content: `El certificado no cumple con el formato esperado`,
                         });
                     }
 
@@ -237,8 +234,7 @@ export default (() => {
                     const validationResult = await validateCertificate(certificateCode);
                     if (!validationResult.valid) {
                         return interaction.editReply({
-                            // NOTE: update error in spanish
-                            content: `Error ${validationResult.status}`,
+                            content: `El certificado no es valido, intenta con uno nuevo`,
                         });
                     }
 
@@ -247,6 +243,7 @@ export default (() => {
                     try {
                         const member = await prisma.member.create({
                             data: {
+                                guild_id: interaction.guildId,
                                 member_id: interaction.member.id,
                                 legajo: parseResult.legajo!,
                                 dni: parseResult.dni!,
@@ -257,25 +254,11 @@ export default (() => {
                         if (error instanceof PrismaClientKnownRequestError) {
                             if (error.code === 'P2002') {
                                 return interaction.editReply({
-                                    // NOTE: update error in spanish
-                                    content: `You are already verified`,
+                                    content: `Ya estas verificado o tus credenciales ya fueron usadas, contacta a un administrador si crees que esto es un error`,
                                 });
-                                // if ((error.meta?.target as any).includes('legajo')) {
-                                //     return interaction.editReply({
-                                //         // NOTE: update error in spanish
-                                //         content: `Legajo already registered`,
-                                //     });
-                                // }
-                                // if ((error.meta?.target as any).includes('member_id')) {
-                                //     return interaction.editReply({
-                                //         // NOTE: update error in spanish
-                                //         content: `You are already verified`,
-                                //     });
-                                // }
                             }
                             return interaction.editReply({
-                                // NOTE: update error in spanish
-                                content: `Error ${error.code} db error`,
+                                content: `Ocurrio un error con la db al verificar tu cuenta, intenta nuevamente mas tarde`,
                             });
                         }
                         throw error;
@@ -284,8 +267,7 @@ export default (() => {
                     await interaction.member.roles.add(VERIFIED_ROLE_ID);
 
                     return interaction.editReply({
-                        // Note: update success in spanish
-                        content: `Successfully verified\n\`\`\`json\n${JSON.stringify(parseResult, null, 2)}\n\`\`\``,
+                        content: `Te has verificado exitosamente`,
                     });
                 }
             );
