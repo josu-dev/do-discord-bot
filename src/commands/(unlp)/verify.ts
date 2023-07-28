@@ -30,9 +30,9 @@ const CERTIFICATE_IMAGE_QUANTITY = 3;
 
 const QR_IMAGE_INDEX = 1;
 
-const VALIDATION_URL_DOMAINNAME = `https://www.guarani-informatica.unlp.edu.ar`;
+const VALIDATION_URL_RE = new RegExp(`^https?://(www[.])?guarani-informatica.unlp.edu.ar/validador_certificados/\\d+\\s*$`);
 
-const VALIDATION_URL = `${VALIDATION_URL_DOMAINNAME}/validador_certificados/validar`;
+const VALIDATION_URL = `https://www.guarani-informatica.unlp.edu.ar/validador_certificados/validar`;
 
 const VERIFIED_ROLE_ID = process.env.enviromentIsDev === 'true' ? '1133933055422246914' : GUILD.ROLES.VERIFIED;
 
@@ -152,7 +152,6 @@ export default (() => {
                 }).promise;
             }
             catch (error) {
-                console.error(error);
                 return interaction.editReply({
                     content: `Ocurrio un error al procesar el certificado adjuntado`,
                 });
@@ -223,13 +222,13 @@ export default (() => {
                         });
                     }
 
-                    if (!qrCode.data.startsWith(VALIDATION_URL_DOMAINNAME)) {
+                    if (!VALIDATION_URL_RE.test(qrCode.data)) {
                         return interaction.editReply({
                             content: `El certificado no cumple con el formato esperado`,
                         });
                     }
 
-                    const certificateCode = qrCode.data.split('/').at(-1)!;
+                    const certificateCode = qrCode.data.split('/').at(-1)?.trim()!;
 
                     const validationResult = await validateCertificate(certificateCode);
                     if (!validationResult.valid) {
