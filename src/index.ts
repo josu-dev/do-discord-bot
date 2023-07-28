@@ -4,7 +4,7 @@ dotenv.config();
 import { logWithTime } from './lib';
 import { initializeScrapers } from './plugins/scrapers';
 import { CustomClient } from './core';
-import { initWebServer } from './express';
+import { initWebServer } from './render';
 
 
 const client = new CustomClient();
