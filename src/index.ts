@@ -4,6 +4,7 @@ dotenv.config();
 import { logWithTime } from './lib';
 import { initializeScrapers } from './plugins/scrapers';
 import { CustomClient } from './core';
+import { initWebServer } from './express';
 
 
 const client = new CustomClient();
@@ -24,6 +25,7 @@ process.on('SIGTERM', exit);
 (async () => {
     await client.start();
     await initializeScrapers(client);
+    initWebServer();
 })();
 
 
