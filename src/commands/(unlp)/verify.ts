@@ -152,7 +152,6 @@ export default (() => {
                 }).promise;
             }
             catch (error) {
-                console.error(error);
                 return interaction.editReply({
                     content: `Ocurrio un error al procesar el certificado adjuntado`,
                 });

@@ -20,7 +20,6 @@ export default (() => {
 
             let error = false;
             await interaction.channel?.bulkDelete(amount, true).catch(async error => {
-                console.error(error, '\nbot keeps running');
                 if (!interaction.replied) {
                     interaction.reply({
                         content: 'There was an error trying to prune messages in this channel!',
