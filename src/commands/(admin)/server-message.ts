@@ -27,6 +27,10 @@ const commandData = new SlashCommandBuilder()
     .addBooleanOption(opt => opt
         .setName('signed')
         .setDescription('If the embeds must be signed or by the server, default true')
+    )
+    .addBooleanOption(opt => opt
+        .setName('everyone')
+        .setDescription('If the message should mention everyone, default false')
     );
 
 for (let i = 0; i < MAX_EMBED_OPTIONS; i++) {
@@ -50,6 +54,8 @@ export default (() => {
             const title = opt.getString('title');
             const content = opt.getString('content');
             const isSigned = opt.getBoolean('signed') ?? true;
+            const mentionEveryone = opt.getBoolean('everyone') ?? false;
+
 
             if ((title && !content) || (!title && content)) {
                 return interaction.editReply({
@@ -145,7 +151,10 @@ export default (() => {
                 }
             }
 
-            const serverMessage = await channel.send({ embeds: embeds });
+            const serverMessage = await channel.send({
+                content: mentionEveryone ? '@everyone' : undefined,
+                embeds: embeds
+            });
 
             return interaction.editReply({
                 content: serverMessage ?
