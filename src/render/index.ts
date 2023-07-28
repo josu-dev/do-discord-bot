@@ -13,9 +13,6 @@ const DEFAULT_HTML = `<!DOCTYPE html>
 <body>
     <main>
         <h1>A discord bot</h1>
-        <div>
-            <p>Check out the <a href='https://github.com/J-Josu/do-discord-bot'>source code</a></p>
-        </div>
     </main>
     <footer>
         <p>Made with ❤ by J-Josu</p>
