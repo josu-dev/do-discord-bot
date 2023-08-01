@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { DiscordAPIError, SlashCommandBuilder } from 'discord.js';
 import { SingleFileCommandDefinition } from '../+type';
 import type { TextItem, TextContent, PDFDocumentProxy } from "pdfjs-dist/types/src/display/api";
 import jsQR from "jsqr";
@@ -8,6 +8,8 @@ import prisma from '../../db';
 import { GUILD } from '../../globalConfigs';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { VerbosityLevel, getDocument, OPS } from 'pdfjs-dist';
+import { logWithTime } from '../../lib';
+import { Member } from '@prisma/client';
 
 
 const commandData = new SlashCommandBuilder()
@@ -73,26 +75,44 @@ const isRegularRegex = /El alumno es regular/;
 
 function parseHTML(html: string) {
     const $ = cheerio.load(html);
-    const script = $('body script').get()[0];
-    if (!script) {
+    const script = $('body script').get();
+    if (!script || script.length === 0) {
         return {
             isRegular: false,
         } as const;
     }
-    const text = script.children[0];
+
+    const text = script[0]?.children[0];
     if (!text || !('data' in text) || typeof text.data !== 'string') {
         return {
             isRegular: false,
         } as const;
     }
+
     const rawData = text.data.match(/on_arrival\((.*)\);/)?.[1];
     if (!rawData) {
         return {
             isRegular: false,
         } as const;
     }
-    const obj = JSON.parse(rawData);
-    const htmlContent = (obj.content ?? '') as string;
+    let obj: unknown;
+    try {
+        obj = JSON.parse(rawData);
+    }
+    catch (e) {
+        logWithTime(`Malformed json in certificate html content: ${e}`);
+        return {
+            isRegular: false,
+        } as const;
+    }
+    if (typeof obj !== 'object' || !obj || !('content' in obj) || typeof obj.content !== 'string') {
+        logWithTime(`Malformed json in certificate html content: ${obj}`);
+        return {
+            isRegular: false,
+        } as const;
+    }
+
+    const htmlContent = obj.content ?? '';
     if (!isRegularRegex.test(htmlContent)) {
         return {
             isRegular: false,
@@ -101,6 +121,12 @@ function parseHTML(html: string) {
 
     const legajo = htmlContent.match(legajoRegex)?.[1];
     const dni = htmlContent.match(dniRegex)?.[1];
+    if (!legajo || !dni) {
+        logWithTime(`Malformed html content: ${htmlContent}`);
+        return {
+            isRegular: false,
+        } as const;
+    }
 
     return {
         isRegular: true,
@@ -138,6 +164,9 @@ export default (() => {
             await interaction.deferReply({ ephemeral: true, fetchReply: true });
 
             const certificate = interaction.options.getAttachment('regularity_certificate', true);
+
+            logWithTime(`[INFO] ${interaction.member.displayName} tried to verify with an invalid certificate. Payload: \nmember_id: ${interaction.member.id}\ncertificate_url: ${certificate.url}`);
+
             if (!certificate.url.endsWith('.pdf')) {
                 return interaction.editReply({
                     content: `Formato de certificado invalido, debe ser PDF`,
@@ -152,7 +181,6 @@ export default (() => {
                 }).promise;
             }
             catch (error) {
-                console.error(error);
                 return interaction.editReply({
                     content: `Ocurrio un error al procesar el certificado adjuntado`,
                 });
@@ -233,15 +261,23 @@ export default (() => {
 
                     const validationResult = await validateCertificate(certificateCode);
                     if (!validationResult.valid) {
+                        logWithTime(`[ERROR] ${interaction.member.user.tag} tried to verify with an invalid certificate. Payload: \nmember_id: ${interaction.member.id}\ncertificate_url: ${certificate.url}\nvalidation_result: ${JSON.stringify(validationResult)}`);
                         return interaction.editReply({
                             content: `El certificado no es valido, intenta con uno nuevo`,
                         });
                     }
 
                     const parseResult = parseHTML(validationResult.text);
+                    if (!parseResult.isRegular) {
+                        logWithTime(`[ERROR] ${interaction.member.user.tag} tried to verify with an invalid certificate. Payload: \nmember_id: ${interaction.member.id}\ncertificate_url: ${certificate.url}\nlegajo: ${parseResult.legajo}\ndni: ${parseResult.dni}`);
+                        return interaction.editReply({
+                            content: `El certificado no es valido, contacta a un administrador si crees que esto es un error`,
+                        });
+                    }
 
+                    let member: Member;
                     try {
-                        const member = await prisma.member.create({
+                        member = await prisma.member.create({
                             data: {
                                 guild_id: interaction.guildId,
                                 member_id: interaction.member.id,
@@ -264,7 +300,18 @@ export default (() => {
                         throw error;
                     }
 
-                    await interaction.member.roles.add(VERIFIED_ROLE_ID);
+                    try {
+                        await interaction.member.roles.add(VERIFIED_ROLE_ID);
+                    }
+                    catch (error) {
+                        if (error instanceof DiscordAPIError) {
+                            logWithTime(`[ERROR] ${interaction.member.user.tag} tried to verify but the bot couldn't assign the verified role. Payload: \nmember_id: ${interaction.member.id}\ncertificate_url: ${certificate.url}\nlegajo: ${parseResult.legajo}\ndni: ${parseResult.dni}\nmember: ${JSON.stringify(member)}\nerror: ${JSON.stringify(error)}`);
+                            return interaction.editReply({
+                                content: `Ocurrio un error al asignarte el rol verificado, contacta a un administrador y dale el siguiente id: '${member.id}' para que te lo asigne manualmente `,
+                            });
+                        }
+                        throw error;
+                    }
 
                     return interaction.editReply({
                         content: `Te has verificado exitosamente`,
