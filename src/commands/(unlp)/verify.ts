@@ -71,7 +71,7 @@ async function validateCertificate(code: string) {
 
 const legajoRegex = /legajo n\u00famero (\d+\/\d)/;
 const dniRegex = /DNI (\d+)/;
-const isRegularRegex = /El alumno es regular/;
+const isRegularRegex = /alumn[ao] es regular/;
 
 function parseHTML(html: string) {
     const $ = cheerio.load(html);
@@ -165,7 +165,7 @@ export default (() => {
 
             const certificate = interaction.options.getAttachment('regularity_certificate', true);
 
-            logWithTime(`[INFO] ${interaction.member.displayName} tried to verify with an invalid certificate. Payload: \nmember_id: ${interaction.member.id}\ncertificate_url: ${certificate.url}`);
+            logWithTime(`[INFO] ${interaction.member.displayName} started verification process. Context:\nmember_id: ${interaction.member.id}\ncertificate_url: ${certificate.url}`);
 
             if (!certificate.url.endsWith('.pdf')) {
                 return interaction.editReply({
