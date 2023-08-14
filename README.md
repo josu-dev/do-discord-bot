@@ -43,7 +43,8 @@ A bot for managing a Discord server for students of computer science at Facultad
     - [ ] Configuration validation
 
 - Server related
-  - [ ] Customizable welcome message
+  - [X] Customizable welcome message
+  - [X] Customizable boost message
   - [X] On join role assignment (when agreed to rules)
   - [X] Server message
 
@@ -66,16 +67,15 @@ npm install
 Create a `.env` file in the root directory with the following content:
 
 ```bash
-enviromentIsDev=true
-enviromentIsProd=false
-botToken=your_bot_token
-applicationId=your_application_id
-guildId=your_guild_id
+RUNNING_ENVIROMENT=development
+BOT_TOKEN=your_bot_token
+APPLICATION_ID=your_application_id
+GUILD_ID=your_guild_id
 ```
 
-> Change the values of the variables to the corresponding ones, and toggle the enviroment variables when deploying to production.
+> Change the values of the variables to the corresponding ones depending if the enviroment is development or production.
 
-Configure the necessary items in [src/globalConfig.ts](./src/globalConfigs.ts)
+Configure the necessary items in [src/botConfig.ts](./src/botConfig.ts)
 
 When developing run:
 
@@ -133,7 +133,8 @@ npm run start:prod
 ┃ ┣ 📄 center
 ┃ ┣ 📄 explain
 ┃ ┗ 📄 socials
-┗ 📄 r-info
+┃ 📄 r-info
+┗ 📄 verify
 📦 utils
 ┣ 📁 pomodoro
 ┃ ┣ 📄 end
