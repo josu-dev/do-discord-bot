@@ -1,5 +1,5 @@
 import type { EventDefinition } from './+type';
-import { PRESENCES } from '../globalConfigs';
+import { PRESENCES } from '../botConfig';
 import { ExtendedClient } from '../core/client';
 import { logWithTime, pickRandom } from '../lib';
 

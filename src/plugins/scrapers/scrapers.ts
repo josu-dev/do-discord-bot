@@ -2,10 +2,11 @@ import { GuildBasedChannel, Message, hideLinkEmbed, hyperlink, ChannelType } fro
 import { NOTIFICATIONS } from './config';
 import { BillboardScraper } from './gestiondocente/billboardScraper';
 import { ExtendedClient } from '../../core/client';
-import { TaskSchedulerTrait } from '../../globalTypes';
+import { TaskSchedulerTrait } from '../../core/types';
+import { dev, guildId } from '../../enviroment';
 
 
-const billboardNotificacionsChannel = process.env.enviromentIsDev === 'true' ? '1138537990352810004' : '1075770845487710298';
+const billboardNotificacionsChannel = dev ? '1138537990352810004' : '1075770845487710298';
 
 const billboard = new BillboardScraper();
 
@@ -28,7 +29,7 @@ async function fetchLastMessageId(channel: GuildBasedChannel) {
 
 export async function initializeScrapers(client: ExtendedClient): Promise<void> {
     billboard.onUpdate(async (messages) => {
-        const channel = client.guilds.cache.get(process.env.guildId!)?.channels.cache.get(billboardNotificacionsChannel);
+        const channel = client.guilds.cache.get(guildId)?.channels.cache.get(billboardNotificacionsChannel);
         if (!channel?.isTextBased()) return;
 
         for (let i = messages.length - 1; i >= 0; i--) {
@@ -64,7 +65,7 @@ export async function initializeScrapers(client: ExtendedClient): Promise<void> 
     });
 
     client.on('ready', async (client) => {
-        const channel = client.guilds.cache.get(process.env.guildId!)?.channels.cache.get(billboardNotificacionsChannel);
+        const channel = client.guilds.cache.get(guildId)?.channels.cache.get(billboardNotificacionsChannel);
         let id: string | undefined;
         if (channel) {
             id = await fetchLastMessageId(channel);

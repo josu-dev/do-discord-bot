@@ -1,5 +1,5 @@
 import type { EventDefinition } from './+type';
-import { GUILD } from '../globalConfigs';
+import { GUILD } from '../botConfig';
 import { logWithTime } from '../lib';
 
 

@@ -1,6 +1,6 @@
 import { codeBlock, SlashCommandSubcommandBuilder, APIEmbed } from 'discord.js';
 import { SubCommandDefinition } from './+command';
-import { REPLY } from '../../../globalConfigs';
+import { REPLY } from '../../../botConfig';
 
 
 export default (() => {

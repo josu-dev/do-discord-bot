@@ -1,6 +1,6 @@
 import type { EventDefinition } from './+type';
 import { ChannelType } from 'discord.js';
-import { GUILD } from '../globalConfigs';
+import { GUILD } from '../botConfig';
 
 
 export default (() => {

@@ -32,11 +32,11 @@ export { };
 // // To delete commands?
 // import { REST, Routes } from 'discord.js';
 
-// const rest = new REST({ version: '10' }).setToken(process.env.botToken!);
-// rest.put(Routes.applicationGuildCommands(process.env.applicationId!, process.env.guildId!), { body: [] })
+// const rest = new REST({ version: '10' }).setToken(botToken);
+// rest.put(Routes.applicationGuildCommands(applicationId, guildId), { body: [] })
 //     .then(() => console.log('Successfully deleted all guild commands.'))
 //     .catch(console.error);
 // // for global commands
-// rest.put(Routes.applicationCommands(process.env.applicationId!), { body: [] })
+// rest.put(Routes.applicationCommands(applicationId), { body: [] })
 //     .then(() => console.log('Successfully deleted all application commands.'))
 //     .catch(console.error);

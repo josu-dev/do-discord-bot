@@ -1,4 +1,5 @@
 import { ActivityType, Partials, PresenceData } from 'discord.js';
+import env from './enviroment';
 
 
 export const INTERACTION = {
@@ -13,12 +14,11 @@ export const INTERACTION = {
 export const CLIENT = {
     INTENTS: 3276799,
     PARTIALS: [Partials.Channel, Partials.Message, Partials.Reaction],
-    SINGLE_GUILD: true,
 } as const;
 
 
 /*
- * Bot customizations
+ * Customizations
  */
 
 export const REPLY = {
@@ -53,7 +53,7 @@ export const PRESENCES = [
 
 
 /*
- * Guild configurations, only applies if CLIENT.SINGLE_GUILD is true
+ * Configuration of the guild
  */
 
 export const GUILD = {
@@ -68,11 +68,17 @@ export const GUILD = {
         VERIFIED: '1133910615845523536',
     },
     INVITE: {
-        CODE: 'Jur4R4Jcpx',
-        URL: 'https://discord.gg/Jur4R4Jcpx',
+        CODE: env.guildInviteCode,
+        URL: env.guildInviteCode ? `https://discord.gg/${env.guildInviteCode}` : undefined,
     },
     EMBED: {
         COLOR_HEX: '#94262e',
         COLOR_INT: 0x94262e,
+    },
+    WELCOME: {
+        CHANNEL: '836228707441311754',
+    },
+    BOOST: {
+        CHANNEL: '836228707441311754',
     },
 } as const;
