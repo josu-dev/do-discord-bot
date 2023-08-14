@@ -5,11 +5,12 @@ import jsQR from "jsqr";
 import * as cheerio from 'cheerio';
 import { Replace } from '../../lib/utilType';
 import prisma from '../../db';
-import { GUILD } from '../../globalConfigs';
+import { GUILD } from '../../botConfig';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { VerbosityLevel, getDocument, OPS } from 'pdfjs-dist';
 import { logWithTime } from '../../lib';
 import { Member } from '@prisma/client';
+import { dev } from '../../enviroment';
 
 
 const commandData = new SlashCommandBuilder()
@@ -36,7 +37,7 @@ const VALIDATION_URL_RE = new RegExp(`^https?://(www[.])?guarani-informatica.unl
 
 const VALIDATION_URL = `https://www.guarani-informatica.unlp.edu.ar/validador_certificados/validar`;
 
-const VERIFIED_ROLE_ID = process.env.enviromentIsDev === 'true' ? '1133933055422246914' : GUILD.ROLES.VERIFIED;
+const VERIFIED_ROLE_ID = dev ? '1133933055422246914' : GUILD.ROLES.VERIFIED;
 
 
 async function validateCertificate(code: string) {

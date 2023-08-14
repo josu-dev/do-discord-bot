@@ -1,10 +1,11 @@
 import { ApplicationCommandDataResolvable, SlashCommandBuilder } from 'discord.js';
 import { z } from 'zod';
-import { INTERACTION } from '../../globalConfigs';
+import { INTERACTION } from '../../botConfig';
 import { f, logWithTime } from '../../lib';
 import { ExtendedClient } from '../client';
 import { fsConfig } from './config';
 import { CommandCallbackArgs, SubCommandGroupModule, CommandPermissions, MultiFileCommandDefinition, MultiFileCommandModule, GenericSubCommandDefinition, GroupSetupDefinition, GroupSetupModule, SingleFileCommandDefinition, SingleFileCommandModule, GenericSubCommandModule, SubCommandGroupDefinition, SlashCommandTrait } from './type';
+import { guildId } from '../../enviroment';
 
 
 const singleFileCommandSchema = z.object({
@@ -527,8 +528,8 @@ export async function registerCommands(client: ExtendedClient): Promise<void> {
     }
 
     client.on('ready', async () => {
-        if (process.env.guildId) {
-            await client.guilds.cache.get(process.env.guildId)?.commands.set(commandsData);
+        if (guildId) {
+            await client.guilds.cache.get(guildId)?.commands.set(commandsData);
         }
         else {
             await client.application?.commands.set(commandsData);

@@ -1,7 +1,7 @@
 import { bold, Invite, SlashCommandBuilder } from 'discord.js';
 import { InteractionReply, SingleFileCommandDefinition } from './+type';
 import { addEphemeralOption } from '../lib/discordjs';
-import { CLIENT, GUILD } from '../globalConfigs';
+import { GUILD } from '../botConfig';
 
 
 const commandData = new SlashCommandBuilder()
@@ -14,7 +14,7 @@ addEphemeralOption(commandData);
 const reply = {
     embeds: [{
         color: GUILD.EMBED.COLOR_INT,
-        description: `Link de invitacion: ${bold(GUILD.INVITE.URL)}\n\nCodigo: **${bold(GUILD.INVITE.CODE)}**`,
+        description: `Link de invitacion: ${bold(GUILD.INVITE.URL ?? 'template')}\n\nCodigo: **${bold(GUILD.INVITE.CODE ?? 'template')}**`,
         title: `Invitacion al Servidor`,
         thumbnail: {
             url: ``
@@ -25,7 +25,7 @@ const reply = {
 
 
 export default (() => {
-    let inviteCode: string | undefined = CLIENT.SINGLE_GUILD ? GUILD.INVITE.CODE : undefined;
+    let inviteCode = GUILD.INVITE.CODE;
     return {
         data: commandData,
         async execute({ interaction }) {

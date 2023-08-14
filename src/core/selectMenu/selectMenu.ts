@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { f, logWithTime } from '../../lib';
 import { readJSON, writeJSON } from '../../lib/file';
-import { INTERACTION } from '../../globalConfigs';
+import { INTERACTION } from '../../botConfig';
 import { ExtendedClient } from '../client';
 import { CACHE_NAME_SUFFIX, config } from './config';
 import { DefaultSelectMenuModule, DynamicConfig, SelectMenuTrait } from './type';

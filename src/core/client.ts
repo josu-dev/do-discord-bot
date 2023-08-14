@@ -1,12 +1,13 @@
 import { Client, Collection } from 'discord.js';
 
 import { MutableArray } from '../lib/utilType';
-import { ProgramTaskData, ScheduleTaskData } from '../globalTypes';
-import { CLIENT } from '../globalConfigs';
+import { ProgramTaskData, ScheduleTaskData } from './types';
+import { CLIENT } from '../botConfig';
 import { registerEvents } from './event';
 import { type SlashCommandTrait, registerCommands } from './command';
 import { registerSelectMenus } from './selectMenu';
 import { SelectMenuTrait } from './selectMenu/type';
+import { botToken } from '../enviroment';
 
 
 type RegisteredTask = { callback: (...args: any) => void; id: number | NodeJS.Timeout; };
@@ -17,7 +18,6 @@ export class ExtendedClient extends Client {
     selectMenus: Collection<string, SelectMenuTrait>;
     #programedTasks: Map<string, RegisteredTask>;
     #scheduledTasks: Map<string, RegisteredTask>;
-    readonly singleGuild: boolean;
 
     constructor() {
         super({
@@ -29,14 +29,13 @@ export class ExtendedClient extends Client {
         this.selectMenus = new Collection();
         this.#programedTasks = new Map();
         this.#scheduledTasks = new Map();
-        this.singleGuild = CLIENT.SINGLE_GUILD;
     }
 
     async start() {
         await registerCommands(this);
         await registerEvents(this);
         await registerSelectMenus(this);
-        await this.login(process.env.botToken);
+        await this.login(botToken);
     }
 
 
