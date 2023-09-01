@@ -1,16 +1,16 @@
-import { Member } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { DiscordAPIError, SlashCommandBuilder } from 'discord.js';
-import jsQR from "jsqr";
-import { OPS, VerbosityLevel, getDocument } from 'pdfjs-dist';
-import type { PDFDocumentProxy, TextContent, TextItem } from "pdfjs-dist/types/src/display/api";
-import { z } from 'zod';
 import { SingleFileCommandDefinition } from '../+type';
-import { GUILD } from '../../botConfig';
-import prisma from '../../db';
-import { dev } from '../../enviroment';
-import { logWithTime } from '../../lib';
+import type { TextItem, TextContent, PDFDocumentProxy } from "pdfjs-dist/types/src/display/api";
+import jsQR from "jsqr";
+import * as cheerio from 'cheerio';
 import { Replace } from '../../lib/utilType';
+import prisma from '../../db';
+import { GUILD } from '../../botConfig';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { VerbosityLevel, getDocument, OPS } from 'pdfjs-dist';
+import { logWithTime } from '../../lib';
+import { Member } from '@prisma/client';
+import { dev } from '../../enviroment';
 
 
 const commandData = new SlashCommandBuilder()
@@ -27,79 +27,127 @@ const commandData = new SlashCommandBuilder()
     );
 
 
-const ARGENTINA_UTC_OFFSET = '-03:00' as const;
+const VALID_CERTIFICATE_DURATION = 4 * 60 * 60 * 1000;
 
-const VALID_CERTIFICATE_DURATION = 4 * 60 * 60 * 1000; // 4 hours
-
-const CERTIFICATE_IMAGE_QUANTITY = 2;
+const CERTIFICATE_IMAGE_QUANTITY = 3;
 
 const QR_IMAGE_INDEX = 1;
 
-// OLD VALIDATION_URL_RE
-// const VALIDATION_URL_RE = new RegExp(`^https?://(www[.])?guarani-informatica.unlp.edu.ar/validador_certificados/\\d+\\s*$`);
+const VALIDATION_URL_RE = new RegExp(`^https?://(www[.])?guarani-informatica.unlp.edu.ar/validador_certificados/\\d+\\s*$`);
 
-// NEW VALIDATION_URL_RE
-const VALIDATION_URL_RE = new RegExp(`^https?://(www[.])?autogestion.guarani.unlp.edu.ar/validador_certificados/\\d+/\\d+\\s*$`);
+const VALIDATION_URL = `https://www.guarani-informatica.unlp.edu.ar/validador_certificados/validar`;
 
 const VERIFIED_ROLE_ID = dev ? '1133933055422246914' : GUILD.ROLES.VERIFIED;
 
 
-const pdfDateRE = /^D:(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})([+\-]\d{2})?'(\d{2})'$/;
-
-function parsePDFDate(pdfDate: string) {
-    const match = pdfDateRE.exec(pdfDate);
-    if (!match) {
-        return undefined;
+async function validateCertificate(code: string) {
+    const response = await fetch(
+        VALIDATION_URL,
+        {
+            "headers": {
+                "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+                "content-type": "application/x-www-form-urlencoded",
+            },
+            "body": `codigo_valid=${code}&validar=Validar`,
+            "method": "POST"
+        }
+    );
+    if (response.status !== 200) {
+        return {
+            valid: false,
+            status: response.status,
+            text: undefined
+        } as const;
     }
-    const [, year, month, day, hour, minute, second, offset, offsetMinutes] = match as unknown as [string, string, string, string, string, string, string, string, string];
-    return new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}.000${offset}:${offsetMinutes}`);
+
+    const text = await response.text();
+
+    return {
+        valid: true,
+        status: response.status,
+        text: text
+    } as const;
 }
 
-const metadataDateSchema = z.string().transform((value, ctx) => {
-    value = value.trim();
-    if (!value.length) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: `Invalid date format`,
-            path: [],
-        });
-        return z.NEVER;
-    }
-    const date = parsePDFDate(value);
-    if (!date) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: `Invalid date format`,
-            path: [],
-        });
-        return z.NEVER;
-    }
-    return date;
-});
 
-const metadataSchema = z.object({
-    info: z.object({
-        ModDate: metadataDateSchema.optional(),
-        CreationDate: metadataDateSchema.optional(),
-    }).optional(),
-});
+const legajoRegex = /legajo n\u00famero (\d+\/\d)/;
+const dniRegex = /DNI (\d+)/;
+const isRegularRegex = /alumn[ao] es regular/;
 
-async function getMetadata(pdf: PDFDocumentProxy) {
-    const metadata = await pdf.getMetadata();
-    const result = metadataSchema.safeParse(metadata);
-    if (!result.success) {
-        console.warn(`Malformed metadata: ${JSON.stringify(metadata)}`);
-        return undefined;
+function parseHTML(html: string) {
+    const $ = cheerio.load(html);
+    const script = $('body script').get();
+    if (!script || script.length === 0) {
+        return {
+            isRegular: false,
+        } as const;
     }
-    if (!result.data.info) {
-        console.warn(`Malformed metadata, expected info: ${JSON.stringify(metadata)}`);
-        return undefined;
+
+    const text = script[0]?.children[0];
+    if (!text || !('data' in text) || typeof text.data !== 'string') {
+        return {
+            isRegular: false,
+        } as const;
     }
-    if (!result.data.info.ModDate && !result.data.info.CreationDate) {
-        console.warn(`Malformed metadata, expected ModDate or CreationDate: ${JSON.stringify(metadata)}`);
-        return undefined;
+
+    const rawData = text.data.match(/on_arrival\((.*)\);/)?.[1];
+    if (!rawData) {
+        return {
+            isRegular: false,
+        } as const;
     }
-    return result.data.info;
+    let obj: unknown;
+    try {
+        obj = JSON.parse(rawData);
+    }
+    catch (e) {
+        logWithTime(`Malformed json in certificate html content: ${e}`);
+        return {
+            isRegular: false,
+        } as const;
+    }
+    if (typeof obj !== 'object' || !obj || !('content' in obj) || typeof obj.content !== 'string') {
+        logWithTime(`Malformed json in certificate html content: ${obj}`);
+        return {
+            isRegular: false,
+        } as const;
+    }
+
+    const htmlContent = obj.content ?? '';
+    if (!isRegularRegex.test(htmlContent)) {
+        return {
+            isRegular: false,
+        } as const;
+    }
+
+    const legajo = htmlContent.match(legajoRegex)?.[1];
+    const dni = htmlContent.match(dniRegex)?.[1];
+    if (!legajo || !dni) {
+        logWithTime(`Malformed html content: ${htmlContent}`);
+        return {
+            isRegular: false,
+        } as const;
+    }
+
+    return {
+        isRegular: true,
+        legajo: legajo,
+        dni: dni,
+    } as const;
+}
+
+
+// https://es.wikipedia.org/wiki/Hora_oficial_argentina#:~:text=La%20hora%20oficial%20argentina%20(HOA,2007%20vigente%20a%20la%20fecha.
+
+const ARGENTINA_UTC_OFFSET = '-03:00' as const;
+
+// https://stackoverflow.com/questions/15141762/how-to-initialize-a-javascript-date-to-a-particular-time-zone
+
+function reconstructARGDate(rawDate: string) {
+    const [date, time] = rawDate.split(' ');
+    const [day, month, year] = date!.split('/');
+    const [hour, minute, second] = time!.split(':');
+    return new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}.000${ARGENTINA_UTC_OFFSET}`);
 }
 
 
@@ -118,7 +166,7 @@ export default (() => {
 
             const certificate = interaction.options.getAttachment('regularity_certificate', true);
 
-            logWithTime(`[INFO] ${interaction.member.displayName} started verification process.\n  Context:\n    member_id: ${interaction.member.id}\n    certificate_url: ${certificate.url}`);
+            logWithTime(`[INFO] ${interaction.member.displayName} started verification process. Context:\nmember_id: ${interaction.member.id}\ncertificate_url: ${certificate.url}`);
 
             if (!certificate.url.endsWith('.pdf')) {
                 return interaction.editReply({
@@ -139,38 +187,22 @@ export default (() => {
                 });
             }
 
-            const metadata = await getMetadata(pdf);
-            if (!metadata) {
+            const pdfPage = await pdf.getPage(1);
+
+            const textContent = await pdfPage.getTextContent({ includeMarkedContent: false }) as unknown as Replace<TextContent, 'items', TextItem[]>;
+
+            const possibleEmitionDate = textContent.items.at(-1)?.str;
+            if (!possibleEmitionDate || !/\d+\/\d+\/\d+ \d+:\d+:\d+/.test(possibleEmitionDate)) {
                 return interaction.editReply({
                     content: `El certificado no cumple con el formato esperado`,
                 });
             }
 
-            const { CreationDate, ModDate } = metadata;
-            if (!CreationDate && !ModDate) {
-                return interaction.editReply({
-                    content: `El certificado no cumple con el formato esperado`,
-                });
-            }
-
-            const emitionDate = (CreationDate ?? ModDate)!.valueOf();
+            const emitionDate = reconstructARGDate(possibleEmitionDate).valueOf();
 
             if (Date.now() > (emitionDate + VALID_CERTIFICATE_DURATION)) {
                 return interaction.editReply({
                     content: `El certificado adjuntado ya no es valido, intente con uno mas reciente`,
-                });
-            }
-
-            const pdfPage = await pdf.getPage(1);
-
-            const textContent = await pdfPage.getTextContent({ includeMarkedContent: false }) as unknown as Replace<TextContent, 'items', TextItem[]>;
-            const text = textContent.items.map(item => item.str).join('\n');
-            const textDNI = text.match(/DNI (\d{8})/i)?.[1];
-            const textLegajo = text.match(/legajo Nro: (\d{5}\/\d)/i)?.[1];
-
-            if (!textDNI || !textLegajo) {
-                return interaction.editReply({
-                    content: `El certificado no cumple con el formato esperado`,
                 });
             }
 
@@ -226,20 +258,21 @@ export default (() => {
                         });
                     }
 
-                    const urlParts = qrCode.data.split('/');
-                    const qrDNI = urlParts.at(-2)?.trim();
-                    const qrCertificateCode = urlParts.at(-1)?.trim();
-                    if (!qrDNI || !qrCertificateCode) {
-                        console.log('no dni or certificate code in qr code');
+                    const certificateCode = qrCode.data.split('/').at(-1)?.trim()!;
+
+                    const validationResult = await validateCertificate(certificateCode);
+                    if (!validationResult.valid) {
+                        logWithTime(`[ERROR] ${interaction.member.user.tag} tried to verify with an invalid certificate. Payload: \nmember_id: ${interaction.member.id}\ncertificate_url: ${certificate.url}\nvalidation_result: ${JSON.stringify(validationResult)}`);
                         return interaction.editReply({
-                            content: `El certificado no cumple con el formato esperado`,
+                            content: `El certificado no es valido, intenta con uno nuevo`,
                         });
                     }
 
-                    if (qrDNI !== textDNI) {
-                        logWithTime(`[ERROR] ${interaction.member.user.tag} tried to verify with an invalid certificate. Payload: \nmember_id: ${interaction.member.id}\ncertificate_url: ${certificate.url}\nqr_dni: ${qrDNI}\ntext_dni: ${textDNI}`);
+                    const parseResult = parseHTML(validationResult.text);
+                    if (!parseResult.isRegular) {
+                        logWithTime(`[ERROR] ${interaction.member.user.tag} tried to verify with an invalid certificate. Payload: \nmember_id: ${interaction.member.id}\ncertificate_url: ${certificate.url}\nlegajo: ${parseResult.legajo}\ndni: ${parseResult.dni}`);
                         return interaction.editReply({
-                            content: `El certificado no cumple con el formato esperado`,
+                            content: `El certificado no es valido, contacta a un administrador si crees que esto es un error`,
                         });
                     }
 
@@ -249,8 +282,8 @@ export default (() => {
                             data: {
                                 guild_id: interaction.guildId,
                                 member_id: interaction.member.id,
-                                legajo: textLegajo,
-                                dni: textDNI,
+                                legajo: parseResult.legajo!,
+                                dni: parseResult.dni!,
                             }
                         });
                     }
@@ -273,7 +306,7 @@ export default (() => {
                     }
                     catch (error) {
                         if (error instanceof DiscordAPIError) {
-                            logWithTime(`[ERROR] ${interaction.member.user.tag} tried to verify but the bot couldn't assign the verified role. Payload: \nmember_id: ${interaction.member.id}\ncertificate_url: ${certificate.url}\nlegajo: ${textLegajo}\ndni: ${textDNI}\nmember: ${JSON.stringify(member)}\nerror: ${JSON.stringify(error)}`);
+                            logWithTime(`[ERROR] ${interaction.member.user.tag} tried to verify but the bot couldn't assign the verified role. Payload: \nmember_id: ${interaction.member.id}\ncertificate_url: ${certificate.url}\nlegajo: ${parseResult.legajo}\ndni: ${parseResult.dni}\nmember: ${JSON.stringify(member)}\nerror: ${JSON.stringify(error)}`);
                             return interaction.editReply({
                                 content: `Ocurrio un error al asignarte el rol verificado, contacta a un administrador y dale el siguiente id: '${member.id}' para que te lo asigne manualmente `,
                             });
