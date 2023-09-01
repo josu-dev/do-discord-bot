@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { MultiFileCommandDefinition, SubCommandDefinitionFrom } from '../../+type';
-import type { TaskProgramerTrait } from '../../../globalTypes';
+import type { TaskProgramerTrait } from '../../../core/types';
 import { Values } from '../../../lib/utilType';
 
 

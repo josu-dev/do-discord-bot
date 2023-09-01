@@ -1,6 +1,7 @@
 import type { EventDefinition } from './+type';
 import { ChannelType } from 'discord.js';
-import { GUILD } from '../globalConfigs';
+import { GUILD } from '../botConfig';
+import { logWithTime } from '../lib';
 
 
 export default (() => {
@@ -9,7 +10,9 @@ export default (() => {
         name: `interactionCreate`,
         description: `Validates that a command exist and if that's the case, runs it`,
         async response(client, interaction) {
-            if (!interaction.isChatInputCommand()) return;
+            if (!interaction.isChatInputCommand()) {
+                return;
+            }
 
             if (interaction.channel?.type === ChannelType.DM) {
                 return interaction.reply({
@@ -50,8 +53,9 @@ export default (() => {
             try {
                 await command.execute({ client, interaction, locals });
             } catch (error) {
-                console.error(error);
-                const repliedMessage = await interaction.fetchReply().catch(error => { console.log(error); return undefined; });
+                logWithTime(`Error executing command ${commandName}:\n`, error as any);
+
+                const repliedMessage = await interaction.fetchReply().catch(error => { console.error(error); return undefined; });
                 if (repliedMessage) {
                     repliedMessage.edit({ content: 'There was an error while executing this command!' });
                 }

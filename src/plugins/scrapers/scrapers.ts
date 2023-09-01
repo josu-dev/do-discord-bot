@@ -1,11 +1,12 @@
-import { GuildBasedChannel, Message, hideLinkEmbed, hyperlink } from 'discord.js';
+import { GuildBasedChannel, Message, hideLinkEmbed, hyperlink, ChannelType } from 'discord.js';
 import { NOTIFICATIONS } from './config';
 import { BillboardScraper } from './gestiondocente/billboardScraper';
 import { ExtendedClient } from '../../core/client';
-import { TaskSchedulerTrait } from '../../globalTypes';
+import { TaskSchedulerTrait } from '../../core/types';
+import { dev, guildId } from '../../enviroment';
 
 
-const billboardNotificacionsChannel = process.env.enviromentIsDev === 'true' ? '1081266737019900045' : '1075770845487710298';
+const billboardNotificacionsChannel = dev ? '1138537990352810004' : '1075770845487710298';
 
 const billboard = new BillboardScraper();
 
@@ -28,37 +29,43 @@ async function fetchLastMessageId(channel: GuildBasedChannel) {
 
 export async function initializeScrapers(client: ExtendedClient): Promise<void> {
     billboard.onUpdate(async (messages) => {
-        const channel = client.guilds.cache.get(process.env.guildId!)?.channels.cache.get(billboardNotificacionsChannel);
+        const channel = client.guilds.cache.get(guildId)?.channels.cache.get(billboardNotificacionsChannel);
         if (!channel?.isTextBased()) return;
 
         for (let i = messages.length - 1; i >= 0; i--) {
-            const message = messages[i]!;
-            if (message.canceled) continue;
+            const messageData = messages[i]!;
+            if (messageData.canceled) continue;
 
-            await channel.send({
+            const message = await channel.send({
                 embeds: [{
                     author: {
                         name: `Cartelera | Gestion Docente`,
                         icon_url: `https://www.info.unlp.edu.ar/wp-content/uploads/2019/07/logoo-300x300.jpg`,
                         url: `https://gestiondocente.info.unlp.edu.ar/cartelera/#form[materia]=&`,
                     },
-                    title: `${message.cathedra} | ${message.title}`,
-                    description: message.content,
-                    fields: message.attachments.map((attachment, index) => ({
+                    title: `${messageData.cathedra} | ${messageData.title}`,
+                    description: messageData.content,
+                    fields: messageData.attachments.map((attachment, index) => ({
                         name: `Adjunto ${index + 1}`,
                         value: hyperlink(attachment.name, hideLinkEmbed(attachment.publicUrl ?? 'error con el link'))
                     })),
                     footer: {
-                        text: `${message.author} - ${message.creationDate}`
+                        text: `${messageData.author} - ${messageData.creationDate}`
                     },
                     color: NOTIFICATIONS.gestiondocente.embedColorInt,
                 }]
-            });
+            }).catch(console.error);
+
+            // Discord rate limit message crossposting at 10 per hour, i didn't find a way to check if the rate limit is reached,
+            // anyway, the libraria queue the requests and send them when the rate limit is over
+            if (message && message.crosspostable && message.channel.type === ChannelType.GuildAnnouncement) {
+                message.crosspost().catch(console.error);
+            }
         }
     });
 
     client.on('ready', async (client) => {
-        const channel = client.guilds.cache.get(process.env.guildId!)?.channels.cache.get(billboardNotificacionsChannel);
+        const channel = client.guilds.cache.get(guildId)?.channels.cache.get(billboardNotificacionsChannel);
         let id: string | undefined;
         if (channel) {
             id = await fetchLastMessageId(channel);
