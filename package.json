@@ -1,7 +1,7 @@
 {
     "name": "do-discord-bot",
     "version": "1.0.0",
-    "description": "",
+    "description": "A bot for managing a Discord server for students of computer science at Facultad Informatica UNLP, Argentina.",
     "main": "dist/index.js",
     "scripts": {
         "build": "tsc && echo build: succesfull ✅ || echo build: failed 💥",
@@ -12,8 +12,8 @@
         "postinstall": "npx prisma generate"
     },
     "keywords": [],
-    "author": "",
-    "license": "ISC",
+    "author": "Josue",
+    "license": "MIT",
     "dependencies": {
         "@prisma/client": "^5.0.0",
         "axios": "^1.3.4",

@@ -37,7 +37,7 @@ A bot for managing a Discord server for students of computer science at Facultad
     - [ ] Enable/disable plugins
     - [ ] Plugin intercommunication
   - Configuration
-    - [ ] Configuration defaults
+    - [X] Configuration defaults
     - [ ] Configuration persistance (file/db)
     - [ ] Configuration loader
     - [ ] Configuration validation

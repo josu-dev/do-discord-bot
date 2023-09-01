@@ -11,8 +11,8 @@
 - [X] Start scraping [Gestion Docente | Cartelera](https://gestiondocente.info.unlp.edu.ar/cartelera)
 - [X] Improve the scraping of gestiondocente and better notifications as embeds
 - [X] Create production branch and add github actions for deployment
+- [X] Improve FILE_STRUCTURE.md
 - [ ] Add command disable/enable feature
-- [ ] Improve FILE_STRUCTURE.md
 - [ ] Add twitter scraping
 - [ ] Add database for storing data and configuration (mongo?)
 - [ ] Add metadata/context of the fs for the commands and categories?
