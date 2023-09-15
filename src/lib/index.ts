@@ -1,9 +1,7 @@
 import * as file from './file';
-export { file as f };
-import * as utilType from './utilType';
-export { utilType as ut };
 import * as schema from './schema';
-export { schema };
+import * as utilType from './utilType';
+export { file as f, schema, utilType as ut };
 
 
 const dateFormater = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
@@ -24,4 +22,14 @@ export function pickRandom<T extends unknown>(array: T[]) {
 
 export function hexColorToInt(color: `#${string}`) {
     return parseInt((color).slice(1), 16);
+}
+
+const argFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+});
+
+export function dateAsArg(date: Date | number | undefined) {
+    return argFormatter.format(date);
 }
