@@ -1,7 +1,8 @@
-import type { EventDefinition } from './+type';
-import { GUILD } from '../botConfig';
 import { spoiler, userMention } from 'discord.js';
+import { GUILD } from '../botConfig';
 import { dev } from '../enviroment';
+import { logWithTime } from '../lib';
+import type { EventDefinition } from './+type';
 
 
 const SERVER_BOOST_CHANNEL = dev
@@ -25,6 +26,7 @@ export default (() => {
             if (oldMember.premiumSince === newMember.premiumSince) {
                 return;
             }
+            logWithTime(`Server boost by ${newMember.user.tag} (${newMember.user.id})\n${oldMember.toJSON()}\n${newMember.toJSON()}`);
 
             if (!SERVER_BOOST_URL) {
                 await channel.send(GUILD.BOOST.FALLBACK_MESSAGE.replaceAll(`{{mention}}`, userMention(newMember.id)));
