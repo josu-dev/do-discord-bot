@@ -1,6 +1,6 @@
-import type { EventDefinition } from './+type';
 import { GUILD } from '../botConfig';
 import { logWithTime } from '../lib';
+import type { EventDefinition } from './+type';
 
 
 export default (() => {
@@ -9,6 +9,10 @@ export default (() => {
         name: `guildMemberUpdate`,
         description: `Gives a default rol to a new member when agrees the server rules`,
         async response(client, oldMember, newMember) {
+            if (oldMember.user.bot) {
+                return;
+            }
+
             if (!oldMember.pending || newMember.pending) {
                 return;
             }
