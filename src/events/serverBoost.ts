@@ -19,6 +19,10 @@ export default (() => {
         name: `guildMemberUpdate`,
         description: `Thanks message when a member boost the server`,
         async response(client, oldMember, newMember) {
+            if (oldMember.user.bot) {
+                return;
+            }
+
             const channel = client.channels.cache.get(SERVER_BOOST_CHANNEL);
             if (!channel || channel.isDMBased() || !channel.isTextBased()) {
                 throw new Error(`Bad configuration for server boost channel, CHANNEL: ${GUILD.WELCOME.CHANNEL} is not a valid text channel of guild ${oldMember.guild.name} (${oldMember.guild.id})`);

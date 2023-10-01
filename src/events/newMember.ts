@@ -1,7 +1,7 @@
-import type { EventDefinition } from './+type';
-import { GUILD } from '../botConfig';
 import { spoiler, userMention } from 'discord.js';
+import { GUILD } from '../botConfig';
 import { dev } from '../enviroment';
+import type { EventDefinition } from './+type';
 
 
 const WELCOME_CHANNEL = dev
@@ -18,6 +18,10 @@ export default (() => {
         name: `guildMemberAdd`,
         description: `Welcome message for new members`,
         async response(client, member) {
+            if (member.user.bot) {
+                return;
+            }
+
             const channel = client.channels.cache.get(WELCOME_CHANNEL);
             if (!channel || channel.isDMBased() || !channel.isTextBased()) {
                 throw new Error(`Bad configuration for welcome channel, CHANNEL: ${WELCOME_CHANNEL} is not a valid text channel of guild ${member.guild.name} (${member.guild.id})`);
