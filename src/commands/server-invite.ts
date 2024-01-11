@@ -1,7 +1,7 @@
 import { bold, Invite, SlashCommandBuilder } from 'discord.js';
-import { InteractionReply, SingleFileCommandDefinition } from './+type';
-import { addEphemeralOption } from '../lib/discordjs';
 import { GUILD } from '../botConfig';
+import { addEphemeralOption } from '../lib/discordjs';
+import { SingleFileCommandDefinition } from './+type';
 
 
 const commandData = new SlashCommandBuilder()
@@ -11,21 +11,13 @@ const commandData = new SlashCommandBuilder()
     .setDescriptionLocalization(`es-ES`, `El enlace de invitación al servidor`);
 addEphemeralOption(commandData);
 
-const reply = {
-    embeds: [{
-        color: GUILD.EMBED.COLOR_INT,
-        description: `Link de invitacion: ${bold(GUILD.INVITE.URL ?? 'template')}\n\nCodigo: **${bold(GUILD.INVITE.CODE ?? 'template')}**`,
-        title: `Invitacion al Servidor`,
-        thumbnail: {
-            url: ``
-        }
-    }],
-    ephemeral: true as boolean
-} satisfies InteractionReply;
+
+let replyMessage = `Link de invitacion: ${bold(` https://discord.gg/${GUILD.INVITE.CODE} `)}\n\nCodigo: ${bold(GUILD.INVITE.CODE ?? 'No disponible')}\n** **`;
 
 
 export default (() => {
     let inviteCode = GUILD.INVITE.CODE;
+
     return {
         data: commandData,
         async execute({ interaction }) {
@@ -47,17 +39,15 @@ export default (() => {
                     });
                 }
                 inviteCode = valid.code;
-                reply.embeds[0].description = `Link de invitacion: ${bold(`https://discord.gg/${inviteCode}`)}\n\nCodigo: **${bold(inviteCode)}**`;
+                replyMessage = `Link de invitacion: ${bold(` https://discord.gg/${inviteCode} `)}\n\nCodigo: ${bold(inviteCode)}\n** **`;
             }
 
-            reply.ephemeral = interaction.options.getBoolean('ephemeral') ?? true;
+            const ephemeral = interaction.options.getBoolean('ephemeral') ?? true;
 
-            const guildIconURL = interaction.guild.iconURL();
-            if (guildIconURL) {
-                reply.embeds[0].thumbnail.url = guildIconURL;
-            }
-
-            return interaction.reply(reply);
+            return interaction.reply({
+                content: replyMessage,
+                ephemeral: ephemeral
+            });
         }
     };
 }) satisfies SingleFileCommandDefinition;
