@@ -3,6 +3,9 @@ import { SingleFileCommandDefinition } from '../+type';
 
 
 export default (() => {
+    const NICKNAME_INDICATOR = '!AFK ';
+    const ACTIONS_REASON = 'By AFK mode';
+
     return {
         data: new SlashCommandBuilder()
             .setName('afk')
@@ -16,13 +19,14 @@ export default (() => {
         ,
         async execute({ interaction }) {
             const { member } = interaction;
-            if (!member.voice.channel)
+            if (!member.voice.channel) {
                 return interaction.reply({
                     content: 'Debes estar conectado a un canal de voz para usar el modo AFK',
                     ephemeral: true
                 });
+            }
 
-            const NICKNAME_INDICATOR = '!AFK ';
+            await interaction.deferReply({ ephemeral: true });
 
             const afkMode = interaction.options.getBoolean('state') ?? !member.voice.serverMute;
 
@@ -36,16 +40,15 @@ export default (() => {
                     displayName = displayName.slice(NICKNAME_INDICATOR.length - 1);
                 }
 
-                member.setNickname(displayName);
+                await member.setNickname(displayName, ACTIONS_REASON);
             }
 
-            await member.voice.setMute(afkMode, 'por modo afk');
+            await member.voice.setMute(afkMode, ACTIONS_REASON);
 
-            const message = afkMode ? `Modo AFK activado ;)` : `Modo AFK desactivado ;)`;
+            const message = afkMode ? `Modo AFK activado 😉` : `Modo AFK desactivado 😉`;
 
-            return interaction.reply({
-                content: message,
-                ephemeral: true
+            return interaction.editReply({
+                content: message
             });
         }
     };

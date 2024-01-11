@@ -1,4 +1,4 @@
-import { spoiler, userMention, EmbedBuilder, GuildMember, SlashCommandBuilder, SlashCommandSubcommandBuilder } from 'discord.js';
+import { EmbedBuilder, GuildMember, SlashCommandBuilder, SlashCommandSubcommandBuilder, spoiler, userMention } from 'discord.js';
 
 
 export function mentionAtEnd(userId: string, message: string, mentionVisible = false) {
@@ -32,7 +32,7 @@ export function addEphemeralOption(anyCommandBuilder: Omit<SlashCommandBuilder, 
         .setName(`ephemeral`)
         .setNameLocalization(`es-ES`, `efimero`)
         .setDescription(`Sets the response as ephemeral, default true`)
-        .setDescriptionLocalization(`es-ES`, `Pone la respuesta como efimera, por defecto true`)
+        .setDescriptionLocalization(`es-ES`, `Establece la respuesta como efimera, por defecto true`)
     );
     return anyCommandBuilder;
 }
