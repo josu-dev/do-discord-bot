@@ -1,9 +1,9 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
+import { CustomClient } from './core';
 import { logWithTime } from './lib';
 import { initializeScrapers } from './plugins/scrapers';
-import { CustomClient } from './core';
 
 
 const client = new CustomClient();
@@ -31,6 +31,7 @@ export { };
 
 // // To delete commands?
 // import { REST, Routes } from 'discord.js';
+// import { applicationId, botToken, guildId } from './enviroment';
 
 // const rest = new REST({ version: '10' }).setToken(botToken);
 // rest.put(Routes.applicationGuildCommands(applicationId, guildId), { body: [] })
