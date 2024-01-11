@@ -19,7 +19,7 @@ export default (() => {
             const ephemeral = interaction.options.getBoolean('ephemeral') ?? true;
 
             return interaction.reply({
-                content: `El codigo fuente del bot: ${bold(' ' + REPOSITORY.URL + ' ')}\n** **`,
+                content: `Codigo fuente del bot: ${bold(' ' + REPOSITORY.URL + ' ')}\n** **`,
                 ephemeral: ephemeral
             });
         }
