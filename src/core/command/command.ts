@@ -1,7 +1,7 @@
 import { ApplicationCommandDataResolvable, LocalizationMap, SlashCommandBuilder } from 'discord.js';
 import { z } from 'zod';
 import { INTERACTION } from '../../botConfig';
-import { guildId } from '../../enviroment';
+import { dev, guildId } from '../../enviroment';
 import { f, logWithTime } from '../../lib';
 import { ExtendedClient } from '../client';
 import { fsConfig } from './config';
@@ -518,7 +518,7 @@ async function processCommandsDirectory(baseDir: f.EntryDirectory) {
 async function loadHelpCommand(commands: Group): Promise<SingleFileCommand> {
     const fileEntry = f.fileEntry(
         f.posixJoin(
-            ...f.splitEntrys(__dirname), '..', '..', INTERACTION.COMMANDS.path, '+help.ts'
+            ...f.splitEntrys(__dirname), '..', '..', INTERACTION.COMMANDS.path, (dev ? '+help.ts' : '+help.js')
         )
     );
     if (!fileEntry) {
