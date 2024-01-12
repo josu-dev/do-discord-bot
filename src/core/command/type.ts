@@ -1,4 +1,4 @@
-import type { PermissionFlags, SlashCommandBuilder, SlashCommandOptionsOnlyBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandsOnlyBuilder, ChatInputCommandInteraction, InteractionReplyOptions, APIEmbed } from 'discord.js';
+import type { APIEmbed, ChatInputCommandInteraction, InteractionReplyOptions, LocaleString, PermissionFlags, SlashCommandBuilder, SlashCommandOptionsOnlyBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandsOnlyBuilder } from 'discord.js';
 
 import { AnyTuple, Replace, Values } from '../../lib/utilType';
 import { ExtendedClient } from '../client';
@@ -39,7 +39,7 @@ export type SlashCommandTrait = {
 export type CommandPermissions = Values<PermissionFlags>[];
 
 
-export type SingleFileCommandDefinition = () => {
+export type SingleFileCommandDefinition<P extends readonly unknown[] = unknown[]> = (...args: P) => {
     readonly data: SlashCommandBuilderReturns;
     readonly permissions?: CommandPermissions;
     execute(arg: CommandCallbackArgs): Promise<unknown>;
@@ -48,7 +48,7 @@ export type SingleFileCommandDefinition = () => {
 export type SingleFileCommandModule = { default: SingleFileCommandDefinition; };
 
 
-export type MultiFileCommandDefinition = () => {
+export type MultiFileCommandDefinition<P extends readonly unknown[] = unknown[]> = (...args: P) => {
     readonly data: SlashCommandBuilder;
     readonly permissions?: CommandPermissions;
     execute?(arg: CommandCallbackArgs): Promise<unknown>;
@@ -76,8 +76,9 @@ export type SubCommandDefinitionFrom<T extends MultiFileCommandDefinition, A = R
 
 
 export type GroupSetupDefinition = {
-    readonly categories?: Set<string>;
     readonly permissions?: CommandPermissions;
+    readonly categories?: Set<string>;
+    readonly description?: Partial<Record<LocaleString, string>> & { "en-US": string; };
 };
 
 export type GroupSetupModule = { config: GroupSetupDefinition; };

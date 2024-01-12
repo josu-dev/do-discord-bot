@@ -9,7 +9,7 @@ export type ProgramTaskData<C extends (...args: A) => void, A extends unknown[]>
 
 export type ScheduleTaskData<C extends (...args: A) => void, A extends unknown[]> = TaskData<C, A> & { interval: number; };
 
-export type ProgramTask<C extends (...args: A) => void, A extends unknown[]> = ({ name, callback, ms, args, initialize = false }: ProgramTaskData<C, A>) => void;
+export type ProgramTask<C extends (...args: A) => void, A extends unknown[]> = ({ name, callback, ms, args, initialize }: ProgramTaskData<C, A>) => void;
 
 type RemoveTask = (name: string) => void;
 
