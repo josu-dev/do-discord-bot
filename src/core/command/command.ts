@@ -1,11 +1,11 @@
-import { ApplicationCommandDataResolvable, SlashCommandBuilder } from 'discord.js';
+import { ApplicationCommandDataResolvable, LocalizationMap, SlashCommandBuilder } from 'discord.js';
 import { z } from 'zod';
 import { INTERACTION } from '../../botConfig';
+import { guildId } from '../../enviroment';
 import { f, logWithTime } from '../../lib';
 import { ExtendedClient } from '../client';
 import { fsConfig } from './config';
-import { CommandCallbackArgs, SubCommandGroupModule, CommandPermissions, MultiFileCommandDefinition, MultiFileCommandModule, GenericSubCommandDefinition, GroupSetupDefinition, GroupSetupModule, SingleFileCommandDefinition, SingleFileCommandModule, GenericSubCommandModule, SubCommandGroupDefinition, SlashCommandTrait } from './type';
-import { guildId } from '../../enviroment';
+import { CommandCallbackArgs, CommandPermissions, GenericSubCommandDefinition, GenericSubCommandModule, GroupSetupDefinition, GroupSetupModule, MultiFileCommandDefinition, MultiFileCommandModule, SingleFileCommandDefinition, SingleFileCommandModule, SlashCommandTrait, SubCommandGroupDefinition, SubCommandGroupModule } from './type';
 
 
 const singleFileCommandSchema = z.object({
@@ -77,6 +77,7 @@ const groupSetupSchema = z.object({
     config: z.object({
         categories: z.optional(z.array(z.string())),
         permissions: z.optional(z.array(z.bigint())),
+        description: z.optional(z.record(z.string())),
     }),
 });
 // type test = z.infer<typeof commandSetupModuleSchema>;
@@ -147,6 +148,7 @@ type AccumulatedSetup = {
 type GroupSetup = {
     categories?: Set<string>;
     permission?: bigint;
+    description?: LocalizationMap;
 };
 
 class SubCommand {
@@ -201,15 +203,22 @@ function reducePermissions(accumulated?: bigint, news?: CommandPermissions) {
 
 
 class MultiFileCommand implements SlashCommandTrait {
+    name: string;
     setupFile: f.EntryFile;
     module: MultiFileCommandModule;
     value: ReturnType<MultiFileCommandDefinition>;
     #executionMap: Map<string, SubCommand>;
 
-    constructor(setupFile: f.EntryFile, module: MultiFileCommandModule, subCommandsGroups: RawSubCommandGroup[], subCommands: RawSubCommand[], config?: GroupSetup) {
+    constructor(name: string, setupFile: f.EntryFile, module: MultiFileCommandModule, subCommandsGroups: RawSubCommandGroup[], subCommands: RawSubCommand[], config?: GroupSetup) {
+        this.name = name;
         this.setupFile = setupFile;
         this.module = module;
         this.value = module.default();
+
+        if (this.name !== this.value.data.name) {
+            throw new Error(`command name '${this.name}' does not match with the name '${this.value.data.name}' defined in the command file '${this.setupFile.absolutePath}'`);
+        }
+
         this.#executionMap = new Map();
 
         for (const rawSubCommandGroup of subCommandsGroups) {
@@ -294,20 +303,27 @@ async function proccesMultiFileCommand(directory: f.EntryDirectory, accumulatedS
         return undefined;
     }
 
-    return new MultiFileCommand(setupEntry, setupModule.module, subCommandsGroups, subCommands, accumulatedSetup);
+    const name = directory.name;
+    return new MultiFileCommand(name, setupEntry, setupModule.module, subCommandsGroups, subCommands, accumulatedSetup);
 }
 
 
 class SingleFileCommand implements SlashCommandTrait {
+    name: string;
     file: f.EntryFile;
     module: SingleFileCommandModule;
     value: ReturnType<SingleFileCommandDefinition>;
     execute: ReturnType<SingleFileCommandDefinition>['execute'];
 
-    constructor(file: f.EntryFile, module: SingleFileCommandModule, config?: GroupSetup) {
+    constructor(name: string, file: f.EntryFile, module: SingleFileCommandModule, config?: GroupSetup, args?: unknown[]) {
+        this.name = name;
         this.file = file;
         this.module = module;
-        this.value = module.default();
+        this.value = module.default(...args ?? []);
+
+        if (this.name !== this.value.data.name) {
+            throw new Error(`command name '${this.name}' does not match with the name '${this.value.data.name}' defined in the command file '${this.file.absolutePath}'`);
+        }
 
         const newPermission = reducePermissions(config?.permission, this.value.permissions);
 
@@ -325,14 +341,16 @@ class SingleFileCommand implements SlashCommandTrait {
 
 type Command = SingleFileCommand | MultiFileCommand;
 
-class Group {
+export class Group {
+    name: string;
     file?: f.EntryFile;
     module?: GroupSetupModule;
     value: GroupSetupDefinition;
     innerGroups: Group[];
     commands: Command[];
 
-    constructor(file: f.EntryFile | undefined, module: GroupSetupModule | undefined, value: GroupSetupDefinition, innerGroups: Group[], commands: Command[]) {
+    constructor(name: string, file: f.EntryFile | undefined, module: GroupSetupModule | undefined, value: GroupSetupDefinition, innerGroups: Group[], commands: Command[]) {
+        this.name = name;
         this.file = file;
         this.module = module;
         this.value = value;
@@ -360,7 +378,7 @@ async function processDirectoryGroup(directory: f.EntryDirectory, accumulatedSet
     const setupEntry = directory.extract(fsConfig.groupSetup.re, fsConfig.groupSetup.type);
 
     let setupModule: GroupSetupDefinition = defaultGroupSetup;
-    let actualSetup = accumulatedSetup;
+    let actualSetup: AccumulatedSetup & Pick<GroupSetupDefinition, "description"> = accumulatedSetup;
 
     if (setupEntry) {
         const setup = await f.importModule<GroupSetupModule>(setupEntry.absolutePath, groupSetupSchema);
@@ -368,7 +386,8 @@ async function processDirectoryGroup(directory: f.EntryDirectory, accumulatedSet
             setupModule = setup.module.config;
             actualSetup = {
                 categories: new Set(...accumulatedSetup.categories, ...setupModule.categories ?? []),
-                permission: setupModule.permissions?.reduce((prev, crr) => prev | crr, accumulatedSetup.permission) ?? accumulatedSetup.permission
+                permission: setupModule.permissions?.reduce((prev, crr) => prev | crr, accumulatedSetup.permission) ?? accumulatedSetup.permission,
+                description: setupModule.description
             };
         }
     }
@@ -407,7 +426,8 @@ async function processDirectoryGroup(directory: f.EntryDirectory, accumulatedSet
             continue;
         }
 
-        commands.push(new SingleFileCommand(entry, commandModule.module, actualSetup));
+        const name = entry.name.slice(0, entry.name.length - 3);
+        commands.push(new SingleFileCommand(name, entry, commandModule.module, actualSetup));
     }
 
     if (innerGroups.length === 0 && commands.length === 0) {
@@ -416,7 +436,7 @@ async function processDirectoryGroup(directory: f.EntryDirectory, accumulatedSet
     }
 
     const name = directory.name.slice(1, directory.name.length - 1);
-    return new Group(setupEntry, setupModule as any, actualSetup, innerGroups, commands);
+    return new Group(name, setupEntry, setupModule as any, actualSetup, innerGroups, commands);
 };
 
 
@@ -476,7 +496,8 @@ async function processCommandsDirectory(baseDir: f.EntryDirectory) {
             continue;
         }
 
-        commands.push(new SingleFileCommand(entry, commandModule.module, setup));
+        const name = entry.name.slice(0, entry.name.length - 3);
+        commands.push(new SingleFileCommand(name, entry, commandModule.module, setup));
     }
 
     if (innerGroups.length === 0 && commands.length === 0) {
@@ -484,13 +505,37 @@ async function processCommandsDirectory(baseDir: f.EntryDirectory) {
         return undefined;
     }
 
-    const resultGroup = new Group(setupEntry, setupModule!, setup, innerGroups, commands);
+    const resultGroup = new Group("root", setupEntry, setupModule!, setup, innerGroups, commands);
 
     return {
         commandsDirectory: baseDir,
         result: resultGroup,
         flattenedCommands: resultGroup.flattenCommands()
     };
+}
+
+
+async function loadHelpCommand(commands: Group): Promise<SingleFileCommand> {
+    const fileEntry = f.fileEntry(
+        f.posixJoin(
+            ...f.splitEntrys(__dirname), '..', '..', INTERACTION.COMMANDS.path, '+help.ts'
+        )
+    );
+    if (!fileEntry) {
+        throw new Error(`failed to load help command`);
+    }
+
+    fileEntry.parent = commands.file?.parent;
+
+    const module = await f.importModule<SingleFileCommandModule>(fileEntry.absolutePath, singleFileCommandSchema);
+    if (!module.success) {
+        throw new Error(`failed to load help command\n${module.error}`);
+    }
+
+    const name = 'help';
+    const command = new SingleFileCommand(name, fileEntry, module.module, undefined, [commands]);
+    commands.commands.push(command);
+    return command;
 }
 
 
@@ -503,9 +548,17 @@ async function loadCommands() {
         fileNamePattern: fsConfig.ignored.file.reNegated,
         dirNamePattern: fsConfig.ignored.dir.reNegated,
     });
-    if (!commandsDir || commandsDir.isEmpty()) return undefined;
+    if (!commandsDir || commandsDir.isEmpty()) {
+        return undefined;
+    }
 
     const commands = await processCommandsDirectory(commandsDir);
+    if (!commands) {
+        return undefined;
+    }
+
+    const helpCommand = await loadHelpCommand(commands.result);
+    commands.flattenedCommands.unshift(helpCommand);
 
     return commands;
 }
@@ -535,6 +588,6 @@ export async function registerCommands(client: ExtendedClient): Promise<void> {
             await client.application?.commands.set(commandsData);
         }
 
-        logWithTime('Commands Registered:', commandsNames);
+        logWithTime(`Commands Registered (${commandsNames.length}):`, commandsNames);
     });
 }

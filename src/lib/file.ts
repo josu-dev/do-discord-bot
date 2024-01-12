@@ -207,6 +207,41 @@ function isNodeJSError(error: any): error is NodeJS.ErrnoException {
     return (error?.code !== undefined);
 }
 
+
+export function fileEntry(absPath: string): EntryFile | undefined {
+    if (!absPath) {
+        console.log(`to read a file must provide a valid string path, provided path='${path}'`);
+        return undefined;
+    }
+
+    let stats: fs.Stats;
+    try {
+        stats = fs.statSync(absPath);
+    } catch (error) {
+        if (!isNodeJSError(error)) throw error;
+        switch (error.code) {
+            case 'ENOENT':
+                console.log(`File at '${absPath}' does not exist`);
+                break;
+            case 'EACCES':
+                console.log(`Permission denied to read ${path}`);
+                break;
+            default:
+                console.log(`Unhandled error, code: ${error.code}, message: ${error.message}`);
+                break;
+        }
+        return undefined;
+    }
+    if (!stats.isFile()) {
+        return undefined;
+    }
+
+    return new EntryFile({
+        name: path.basename(absPath),
+        absolutePath: absPath
+    });
+}
+
 type BaseScanOptions = {
     parentDir?: EntryDirectory;
     fileNamePattern?: RegExp,
