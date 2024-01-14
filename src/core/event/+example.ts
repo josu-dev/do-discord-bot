@@ -6,9 +6,9 @@ export default (() => {
     return {
         once: false,
         name: `guildMemberAdd`,
-        description: `Gives a default rol to a new member when agrees the server rules`,
+        description: `Event handler for \`guildMemberAdd\``,
         async response(client, member) {
-            console.log(`New member:\n  id:${member.id}\n  tag:${member.user.tag}`);
+            `New member:\n  id:${member.id}\n  tag:${member.user.tag}`;
         }
     };
 }) satisfies EventDefinition<'guildMemberAdd'>;

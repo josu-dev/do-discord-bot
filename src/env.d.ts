@@ -10,6 +10,8 @@ declare global {
 
             GUILD_ID: string | undefined;
             GUILD_INVITE_CODE: string | undefined;
+
+            LOG_LEVEL: string | undefined;
         }
     }
 }

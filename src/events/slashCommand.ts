@@ -1,7 +1,7 @@
-import type { EventDefinition } from './+type';
 import { ChannelType } from 'discord.js';
 import { GUILD } from '../botConfig';
-import { logWithTime } from '../lib';
+import { log } from '../lib/logging';
+import type { EventDefinition } from './+type';
 
 
 export default (() => {
@@ -53,9 +53,9 @@ export default (() => {
             try {
                 await command.execute({ client, interaction, locals });
             } catch (error) {
-                logWithTime(`Error executing command ${commandName}:\n`, error as any);
+                log.error(`Error executing command ${commandName}:\n`, error);
 
-                const repliedMessage = await interaction.fetchReply().catch(error => { console.error(error); return undefined; });
+                const repliedMessage = await interaction.fetchReply().catch(error => { log.error(error); return undefined; });
                 if (repliedMessage) {
                     repliedMessage.edit({ content: 'There was an error while executing this command!' });
                 }

@@ -1,4 +1,4 @@
-import { ButtonBuilder, ButtonStyle, SlashCommandBuilder, ComponentType, ChatInputCommandInteraction, APIActionRowComponent, APIMessageActionRowComponent, ButtonInteraction, InteractionCollector, CacheType, Collection, userMention, GuildMember, bold, italic, APIEmbed, underscore, quote } from 'discord.js';
+import { APIActionRowComponent, APIEmbed, APIMessageActionRowComponent, ButtonBuilder, ButtonInteraction, ButtonStyle, CacheType, ChatInputCommandInteraction, Collection, ComponentType, GuildMember, InteractionCollector, SlashCommandBuilder, bold, italic, quote, underscore, userMention } from 'discord.js';
 import { SingleFileCommandDefinition } from '../+type';
 import { pickRandom } from '../../lib';
 import { Values } from '../../lib/utilType';
@@ -175,7 +175,6 @@ class SingleplayerRPS implements RPSTrait {
         await this.baseInteract.editReply({
             components: []
         });
-        console.log('unknown reason:', reason);
     }
 }
 
@@ -320,7 +319,6 @@ class MultiplayerRPS implements RPSTrait {
         await this.baseInteract.editReply({
             components: []
         });
-        console.log('unknown reason:', reason);
     }
 }
 

@@ -9,7 +9,7 @@ import { SingleFileCommandDefinition } from '../+type';
 import { GUILD } from '../../botConfig';
 import prisma from '../../db';
 import { dev } from '../../enviroment';
-import { logWithTime } from '../../lib';
+import { log } from '../../lib/logging';
 import { Replace } from '../../lib/utilType';
 
 
@@ -88,15 +88,15 @@ async function getMetadata(pdf: PDFDocumentProxy) {
     const metadata = await pdf.getMetadata();
     const result = metadataSchema.safeParse(metadata);
     if (!result.success) {
-        console.warn(`Malformed metadata: ${JSON.stringify(metadata)}`);
+        log.warn(`Malformed metadata: ${JSON.stringify(metadata)}`);
         return undefined;
     }
     if (!result.data.info) {
-        console.warn(`Malformed metadata, expected info: ${JSON.stringify(metadata)}`);
+        log.warn(`Malformed metadata, expected info: ${JSON.stringify(metadata)}`);
         return undefined;
     }
     if (!result.data.info.ModDate && !result.data.info.CreationDate) {
-        console.warn(`Malformed metadata, expected ModDate or CreationDate: ${JSON.stringify(metadata)}`);
+        log.warn(`Malformed metadata, expected ModDate or CreationDate: ${JSON.stringify(metadata)}`);
         return undefined;
     }
     return result.data.info;
@@ -118,7 +118,7 @@ export default (() => {
 
             const certificate = interaction.options.getAttachment('regularity_certificate', true);
 
-            logWithTime(`[INFO] ${interaction.member.displayName} started verification process.\n  Context:\n    member_id: ${interaction.member.id}\n    certificate_url: ${certificate.url}`);
+            log.info(`${interaction.member.displayName} started verification process.\n  Context:\n    member_id: ${interaction.member.id}\n    certificate_url: ${certificate.url}`);
 
             if (!certificate.url.endsWith('.pdf')) {
                 return interaction.editReply({
@@ -230,14 +230,14 @@ export default (() => {
                     const qrDNI = urlParts.at(-2)?.trim();
                     const qrCertificateCode = urlParts.at(-1)?.trim();
                     if (!qrDNI || !qrCertificateCode) {
-                        console.log('no dni or certificate code in qr code');
+                        log.info(`${interaction.member.user.tag} tried to verify with a certificate that doesn't have a dni or certificate code in the qr code. Payload: \nmember_id: ${interaction.member.id}\ncertificate_url: ${certificate.url}\nqr_code: ${qrCode.data}`);
                         return interaction.editReply({
                             content: `El certificado no cumple con el formato esperado`,
                         });
                     }
 
                     if (qrDNI !== textDNI) {
-                        logWithTime(`[ERROR] ${interaction.member.user.tag} tried to verify with an invalid certificate. Payload: \nmember_id: ${interaction.member.id}\ncertificate_url: ${certificate.url}\nqr_dni: ${qrDNI}\ntext_dni: ${textDNI}`);
+                        log.info(`${interaction.member.user.tag} tried to verify with an invalid certificate. Payload: \nmember_id: ${interaction.member.id}\ncertificate_url: ${certificate.url}\nqr_dni: ${qrDNI}\ntext_dni: ${textDNI}`);
                         return interaction.editReply({
                             content: `El certificado no cumple con el formato esperado`,
                         });
@@ -273,7 +273,7 @@ export default (() => {
                     }
                     catch (error) {
                         if (error instanceof DiscordAPIError) {
-                            logWithTime(`[ERROR] ${interaction.member.user.tag} tried to verify but the bot couldn't assign the verified role. Payload: \nmember_id: ${interaction.member.id}\ncertificate_url: ${certificate.url}\nlegajo: ${textLegajo}\ndni: ${textDNI}\nmember: ${JSON.stringify(member)}\nerror: ${JSON.stringify(error)}`);
+                            log.error(`${interaction.member.user.tag} tried to verify but the bot couldn't assign the verified role. Payload: \nmember_id: ${interaction.member.id}\ncertificate_url: ${certificate.url}\nlegajo: ${textLegajo}\ndni: ${textDNI}\nmember: ${JSON.stringify(member)}\nerror: ${JSON.stringify(error)}`);
                             return interaction.editReply({
                                 content: `Ocurrio un error al asignarte el rol verificado, contacta a un administrador y dale el siguiente id: '${member.id}' para que te lo asigne manualmente `,
                             });

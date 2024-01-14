@@ -38,7 +38,6 @@ function commandGroupHelp(group: Group, locale: LocaleString, permissions: Permi
     if (!commandsList) {
         return '';
     }
-    console.log(group.value);
 
     return `\n### ${group.name}\n${group.value.description?.[locale] ?? 'Sin descripcion'}\n${commandsList}`;
 }
