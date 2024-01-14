@@ -1,7 +1,7 @@
 import { inlineCode, SlashCommandBuilder } from 'discord.js';
-import { SingleFileCommandDefinition } from '../+type';
-import { logWithTime } from '../../lib';
-import { dev } from '../../enviroment';
+import { dev } from '../enviroment';
+import { log } from '../lib/logging';
+import { SingleFileCommandDefinition } from './+type';
 
 
 export default (() => {
@@ -24,7 +24,7 @@ export default (() => {
             )
         ,
         async execute({ client, interaction }) {
-            dev && logWithTime(`user '${interaction.member.displayName}' pinged`);
+            dev && log.info(`User '${interaction.member.displayName}' pinged`);
 
             if (interaction.options.getSubcommand() === 'server-bot') {
                 return interaction.reply(inlineCode(`Latency server -> bot: ${client.ws.ping}ms`));

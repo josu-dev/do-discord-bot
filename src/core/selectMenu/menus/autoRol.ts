@@ -1,8 +1,9 @@
-import { z } from 'zod';
 import { APIEmbed, Role } from 'discord.js';
+import { z } from 'zod';
+import { log } from '../../../lib/logging';
 import { embedSchema } from '../../../lib/schema';
-import { baseConfigSchema, customIdSchema } from './shared';
 import { DefaultSelectMenuDefinition, ExtendBaseConfig } from '../type';
+import { baseConfigSchema, customIdSchema } from './shared';
 
 
 export const TYPE_ID = `PICK_ROLES`;
@@ -65,7 +66,7 @@ export default ((config) => {
 
             setTimeout(
                 async () => {
-                    await interaction.deleteReply().catch(e => console.log(e));
+                    await interaction.deleteReply().catch(e => log.error(e));
                 },
                 7.5 * 1000
             );

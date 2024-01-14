@@ -16,6 +16,10 @@ export const CLIENT = {
     PARTIALS: [Partials.Channel, Partials.Message, Partials.Reaction],
 } as const;
 
+export const REPOSITORY = {
+    URL: 'https://github.com/J-Josu/do-discord-bot',
+} as const;
+
 
 /*
  * Customizations

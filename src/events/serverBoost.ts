@@ -1,7 +1,8 @@
-import type { EventDefinition } from './+type';
-import { GUILD } from '../botConfig';
 import { spoiler, userMention } from 'discord.js';
+import { GUILD } from '../botConfig';
 import { dev } from '../enviroment';
+import { log } from '../lib/logging';
+import type { EventDefinition } from './+type';
 
 
 const SERVER_BOOST_CHANNEL = dev
@@ -18,13 +19,18 @@ export default (() => {
         name: `guildMemberUpdate`,
         description: `Thanks message when a member boost the server`,
         async response(client, oldMember, newMember) {
+            if (oldMember.user.bot) {
+                return;
+            }
+
             const channel = client.channels.cache.get(SERVER_BOOST_CHANNEL);
             if (!channel || channel.isDMBased() || !channel.isTextBased()) {
                 throw new Error(`Bad configuration for server boost channel, CHANNEL: ${GUILD.WELCOME.CHANNEL} is not a valid text channel of guild ${oldMember.guild.name} (${oldMember.guild.id})`);
             }
-            if (oldMember.premiumSince === newMember.premiumSince) {
+            if (!newMember.premiumSince || oldMember.premiumSince === newMember.premiumSince) {
                 return;
             }
+            log.debug(`Server boost by ${newMember.user.tag} (${newMember.user.id})\n${oldMember.toJSON()}\n${newMember.toJSON()}`);
 
             if (!SERVER_BOOST_URL) {
                 await channel.send(GUILD.BOOST.FALLBACK_MESSAGE.replaceAll(`{{mention}}`, userMention(newMember.id)));
@@ -42,15 +48,15 @@ export default (() => {
             catch (error) {
                 if (error instanceof TypeError) {
                     if (error.message.includes('fetch failed')) {
-                        console.error(`Error fetching welcome image for ${newMember.user.tag} (${newMember.user.id})`);
+                        log.error(`Error fetching welcome image for ${newMember.user.tag} (${newMember.user.id})`);
                     }
                     else {
-                        console.error(`Error sending welcome image for ${newMember.user.tag} (${newMember.user.id})\n`, error);
+                        log.error(`Error sending welcome image for ${newMember.user.tag} (${newMember.user.id})\n`, error);
                     }
                     await channel.send(GUILD.WELCOME.FALLBACK_MESSAGE.replaceAll(`{{mention}}`, userMention(newMember.id)));
                 }
                 else {
-                    console.error(`Unknown error sending welcome message for ${newMember.user.tag} (${newMember.user.id})`);
+                    log.error(`Unknown error sending welcome message for ${newMember.user.tag} (${newMember.user.id})`);
                     throw error;
                 }
             }

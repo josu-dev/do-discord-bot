@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { f, logWithTime } from '../../lib';
+import { f } from '../../lib';
+import { log } from '../../lib/logging';
 import { ExtendedClient } from '../client';
 import type { EventCallback, EventModule, EventNames } from './type';
 
@@ -48,7 +49,7 @@ export async function registerEvents(client: ExtendedClient): Promise<void> {
         fileNamePattern: /^[^!+][\w-]+\.(ts|js)$/,
     });
     if (!eventsToLoad || eventsToLoad.length === 0) {
-        logWithTime(`Failed to find events to register`);
+        log.warn(`Failed to find events to register`);
         return;
     }
 
@@ -57,8 +58,8 @@ export async function registerEvents(client: ExtendedClient): Promise<void> {
 
         const importResult = await f.importModuleWithZod<EventModule>(EVENT_ABS_PATH, eventSchema);
         if (!importResult.success) {
-            console.log(`import error: ${importResult.error}\n  path > ${EVENT_ABS_PATH}\n  exception?.name > ${importResult.exception?.name}`);
-            console.log(`Event declared at path '${EVENT_ABS_PATH}' has problems, not loaded`);
+            log.warn(`import error: ${importResult.error}\n  path > ${EVENT_ABS_PATH}\n  exception?.name > ${importResult.exception?.name}`);
+            log.warn(`Event declared at path '${EVENT_ABS_PATH}' has problems, not loaded`);
             continue;
         };
 

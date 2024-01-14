@@ -1,11 +1,12 @@
-import { ApplicationCommandDataResolvable, SlashCommandBuilder } from 'discord.js';
+import { ApplicationCommandDataResolvable, LocalizationMap, SlashCommandBuilder } from 'discord.js';
 import { z } from 'zod';
 import { INTERACTION } from '../../botConfig';
-import { f, logWithTime } from '../../lib';
+import { dev, guildId } from '../../enviroment';
+import { f } from '../../lib';
+import { log } from '../../lib/logging';
 import { ExtendedClient } from '../client';
 import { fsConfig } from './config';
-import { CommandCallbackArgs, SubCommandGroupModule, CommandPermissions, MultiFileCommandDefinition, MultiFileCommandModule, GenericSubCommandDefinition, GroupSetupDefinition, GroupSetupModule, SingleFileCommandDefinition, SingleFileCommandModule, GenericSubCommandModule, SubCommandGroupDefinition, SlashCommandTrait } from './type';
-import { guildId } from '../../enviroment';
+import { CommandCallbackArgs, CommandPermissions, GenericSubCommandDefinition, GenericSubCommandModule, GroupSetupDefinition, GroupSetupModule, MultiFileCommandDefinition, MultiFileCommandModule, SingleFileCommandDefinition, SingleFileCommandModule, SlashCommandTrait, SubCommandGroupDefinition, SubCommandGroupModule } from './type';
 
 
 const singleFileCommandSchema = z.object({
@@ -77,13 +78,14 @@ const groupSetupSchema = z.object({
     config: z.object({
         categories: z.optional(z.array(z.string())),
         permissions: z.optional(z.array(z.bigint())),
+        description: z.optional(z.record(z.string())),
     }),
 });
 // type test = z.infer<typeof commandSetupModuleSchema>;
 
 
 async function proccessReservedEntry(entry: f.EntryDirectory | f.EntryFile, accumulatedSetup: AccumulatedSetup) {
-    // logWithTime(`reserved entry not processed, entry:\n${JSON.stringify(entry, null, 2)}\n`);
+    // log.dev(`reserved entry not processed, entry:\n${JSON.stringify(entry, null, 2)}\n`);
 }
 
 
@@ -104,7 +106,7 @@ async function processSubCommandGroup(directory: f.EntryDirectory): Promise<RawS
 
     const setupModule = await f.importModule<SubCommandGroupModule>(setupEntry.absolutePath, subCommandGroupSchema);
     if (!setupModule.success) {
-        console.log(`import error: ${setupModule.error}\n  path > ${setupEntry.absolutePath}\n  exception? > ${setupModule.exception?.cause ?? setupModule.exception?.stack}`);
+        log.warn(`import error: ${setupModule.error}\n  path > ${setupEntry.absolutePath}\n  exception? > ${setupModule.exception?.cause ?? setupModule.exception?.stack}`);
         return undefined;
     }
 
@@ -120,7 +122,7 @@ async function processSubCommandGroup(directory: f.EntryDirectory): Promise<RawS
 
         const subCommandModule = await f.importModule<GenericSubCommandModule>(entry.absolutePath, subCommandSchema);
         if (!subCommandModule.success) {
-            console.log(`import error: ${subCommandModule.error}\n  path > ${entry.absolutePath}\n  exception? > ${subCommandModule.exception?.cause ?? subCommandModule.exception?.stack}`);
+            log.warn(`import error: ${subCommandModule.error}\n  path > ${entry.absolutePath}\n  exception? > ${subCommandModule.exception?.cause ?? subCommandModule.exception?.stack}`);
             continue;
         }
 
@@ -128,7 +130,7 @@ async function processSubCommandGroup(directory: f.EntryDirectory): Promise<RawS
     }
 
     if (subCommands.length === 0) {
-        console.log(`skiped empty directory while loading commands at '${directory.absolutePath}'`);
+        log.warn(`skiped empty directory while loading commands at '${directory.absolutePath}'`);
         return undefined;
     }
 
@@ -147,6 +149,7 @@ type AccumulatedSetup = {
 type GroupSetup = {
     categories?: Set<string>;
     permission?: bigint;
+    description?: LocalizationMap;
 };
 
 class SubCommand {
@@ -201,15 +204,22 @@ function reducePermissions(accumulated?: bigint, news?: CommandPermissions) {
 
 
 class MultiFileCommand implements SlashCommandTrait {
+    name: string;
     setupFile: f.EntryFile;
     module: MultiFileCommandModule;
     value: ReturnType<MultiFileCommandDefinition>;
     #executionMap: Map<string, SubCommand>;
 
-    constructor(setupFile: f.EntryFile, module: MultiFileCommandModule, subCommandsGroups: RawSubCommandGroup[], subCommands: RawSubCommand[], config?: GroupSetup) {
+    constructor(name: string, setupFile: f.EntryFile, module: MultiFileCommandModule, subCommandsGroups: RawSubCommandGroup[], subCommands: RawSubCommand[], config?: GroupSetup) {
+        this.name = name;
         this.setupFile = setupFile;
         this.module = module;
         this.value = module.default();
+
+        if (this.name !== this.value.data.name) {
+            throw new Error(`command name '${this.name}' does not match with the name '${this.value.data.name}' defined in the command file '${this.setupFile.absolutePath}'`);
+        }
+
         this.#executionMap = new Map();
 
         for (const rawSubCommandGroup of subCommandsGroups) {
@@ -258,7 +268,7 @@ async function proccesMultiFileCommand(directory: f.EntryDirectory, accumulatedS
 
     const setupModule = await f.importModule<MultiFileCommandModule>(setupEntry.absolutePath, multiFileCommandSchema);
     if (!setupModule.success) {
-        console.log(`import error: ${setupModule.error}\n  path > ${setupEntry.absolutePath}\n  exception? > ${setupModule.exception?.cause ?? setupModule.exception?.stack}`);
+        log.warn(`import error: ${setupModule.error}\n  path > ${setupEntry.absolutePath}\n  exception? > ${setupModule.exception?.cause ?? setupModule.exception?.stack}`);
         return undefined;
     }
 
@@ -282,7 +292,7 @@ async function proccesMultiFileCommand(directory: f.EntryDirectory, accumulatedS
 
         const subCommandModule = await f.importModule<GenericSubCommandModule>(entry.absolutePath, subCommandSchema);
         if (!subCommandModule.success) {
-            console.log(`import error: ${subCommandModule.error}\n  path > ${entry.absolutePath}\n  exception? > ${subCommandModule.exception?.cause ?? subCommandModule.exception?.stack}`);
+            log.warn(`import error: ${subCommandModule.error}\n  path > ${entry.absolutePath}\n  exception? > ${subCommandModule.exception?.cause ?? subCommandModule.exception?.stack}`);
             continue;
         }
 
@@ -290,24 +300,31 @@ async function proccesMultiFileCommand(directory: f.EntryDirectory, accumulatedS
     }
 
     if (subCommandsGroups.length === 0 && subCommands.length === 0) {
-        console.log(`skiped empty directory while loading commands at '${directory.absolutePath}'`);
+        log.warn(`skiped empty directory while loading commands at '${directory.absolutePath}'`);
         return undefined;
     }
 
-    return new MultiFileCommand(setupEntry, setupModule.module, subCommandsGroups, subCommands, accumulatedSetup);
+    const name = directory.name;
+    return new MultiFileCommand(name, setupEntry, setupModule.module, subCommandsGroups, subCommands, accumulatedSetup);
 }
 
 
 class SingleFileCommand implements SlashCommandTrait {
+    name: string;
     file: f.EntryFile;
     module: SingleFileCommandModule;
     value: ReturnType<SingleFileCommandDefinition>;
     execute: ReturnType<SingleFileCommandDefinition>['execute'];
 
-    constructor(file: f.EntryFile, module: SingleFileCommandModule, config?: GroupSetup) {
+    constructor(name: string, file: f.EntryFile, module: SingleFileCommandModule, config?: GroupSetup, args?: unknown[]) {
+        this.name = name;
         this.file = file;
         this.module = module;
-        this.value = module.default();
+        this.value = module.default(...args ?? []);
+
+        if (this.name !== this.value.data.name) {
+            throw new Error(`command name '${this.name}' does not match with the name '${this.value.data.name}' defined in the command file '${this.file.absolutePath}'`);
+        }
 
         const newPermission = reducePermissions(config?.permission, this.value.permissions);
 
@@ -325,14 +342,16 @@ class SingleFileCommand implements SlashCommandTrait {
 
 type Command = SingleFileCommand | MultiFileCommand;
 
-class Group {
+export class Group {
+    name: string;
     file?: f.EntryFile;
     module?: GroupSetupModule;
     value: GroupSetupDefinition;
     innerGroups: Group[];
     commands: Command[];
 
-    constructor(file: f.EntryFile | undefined, module: GroupSetupModule | undefined, value: GroupSetupDefinition, innerGroups: Group[], commands: Command[]) {
+    constructor(name: string, file: f.EntryFile | undefined, module: GroupSetupModule | undefined, value: GroupSetupDefinition, innerGroups: Group[], commands: Command[]) {
+        this.name = name;
         this.file = file;
         this.module = module;
         this.value = value;
@@ -360,7 +379,7 @@ async function processDirectoryGroup(directory: f.EntryDirectory, accumulatedSet
     const setupEntry = directory.extract(fsConfig.groupSetup.re, fsConfig.groupSetup.type);
 
     let setupModule: GroupSetupDefinition = defaultGroupSetup;
-    let actualSetup = accumulatedSetup;
+    let actualSetup: AccumulatedSetup & Pick<GroupSetupDefinition, "description"> = accumulatedSetup;
 
     if (setupEntry) {
         const setup = await f.importModule<GroupSetupModule>(setupEntry.absolutePath, groupSetupSchema);
@@ -368,7 +387,8 @@ async function processDirectoryGroup(directory: f.EntryDirectory, accumulatedSet
             setupModule = setup.module.config;
             actualSetup = {
                 categories: new Set(...accumulatedSetup.categories, ...setupModule.categories ?? []),
-                permission: setupModule.permissions?.reduce((prev, crr) => prev | crr, accumulatedSetup.permission) ?? accumulatedSetup.permission
+                permission: setupModule.permissions?.reduce((prev, crr) => prev | crr, accumulatedSetup.permission) ?? accumulatedSetup.permission,
+                description: setupModule.description
             };
         }
     }
@@ -403,20 +423,21 @@ async function processDirectoryGroup(directory: f.EntryDirectory, accumulatedSet
 
         const commandModule = await f.importModule<SingleFileCommandModule>(entry.absolutePath, singleFileCommandSchema);
         if (!commandModule.success) {
-            console.log(`import error: ${commandModule.error}\n  path > ${entry.absolutePath}\n  exception? > ${commandModule.exception?.cause ?? commandModule.exception?.stack}`);
+            log.warn(`import error: ${commandModule.error}\n  path > ${entry.absolutePath}\n  exception? > ${commandModule.exception?.cause ?? commandModule.exception?.stack}`);
             continue;
         }
 
-        commands.push(new SingleFileCommand(entry, commandModule.module, actualSetup));
+        const name = entry.name.slice(0, entry.name.length - 3);
+        commands.push(new SingleFileCommand(name, entry, commandModule.module, actualSetup));
     }
 
     if (innerGroups.length === 0 && commands.length === 0) {
-        console.log(`skiped empty directory while loading commands at '${directory.absolutePath}'`);
+        log.warn(`skiped empty directory while loading commands at '${directory.absolutePath}'`);
         return undefined;
     }
 
     const name = directory.name.slice(1, directory.name.length - 1);
-    return new Group(setupEntry, setupModule as any, actualSetup, innerGroups, commands);
+    return new Group(name, setupEntry, setupModule as any, actualSetup, innerGroups, commands);
 };
 
 
@@ -472,25 +493,50 @@ async function processCommandsDirectory(baseDir: f.EntryDirectory) {
 
         const commandModule = await f.importModule<SingleFileCommandModule>(entry.absolutePath, singleFileCommandSchema);
         if (!commandModule.success) {
-            console.log(`import error: ${commandModule.error}\n  path > ${entry.absolutePath}\n  exception? > ${commandModule.exception?.cause ?? commandModule.exception?.stack}`);
+            log.warn(`import error: ${commandModule.error}\n  path > ${entry.absolutePath}\n  exception? > ${commandModule.exception?.cause ?? commandModule.exception?.stack}`);
             continue;
         }
 
-        commands.push(new SingleFileCommand(entry, commandModule.module, setup));
+        const name = entry.name.slice(0, entry.name.length - 3);
+        commands.push(new SingleFileCommand(name, entry, commandModule.module, setup));
     }
 
     if (innerGroups.length === 0 && commands.length === 0) {
-        console.log(`skiped empty directory while loading commands at '${baseDirCopy.absolutePath}'`);
+        log.warn(`skiped empty directory while loading commands at '${baseDirCopy.absolutePath}'`);
         return undefined;
     }
 
-    const resultGroup = new Group(setupEntry, setupModule!, setup, innerGroups, commands);
+    const resultGroup = new Group("root", setupEntry, setupModule!, setup, innerGroups, commands);
 
     return {
         commandsDirectory: baseDir,
         result: resultGroup,
         flattenedCommands: resultGroup.flattenCommands()
     };
+}
+
+
+async function loadHelpCommand(commands: Group): Promise<SingleFileCommand> {
+    const fileEntry = f.fileEntry(
+        f.posixJoin(
+            ...f.splitEntrys(__dirname), '..', '..', INTERACTION.COMMANDS.path, (dev ? '+help.ts' : '+help.js')
+        )
+    );
+    if (!fileEntry) {
+        throw new Error(`failed to load help command`);
+    }
+
+    fileEntry.parent = commands.file?.parent;
+
+    const module = await f.importModule<SingleFileCommandModule>(fileEntry.absolutePath, singleFileCommandSchema);
+    if (!module.success) {
+        throw new Error(`failed to load help command\n${module.error}`);
+    }
+
+    const name = 'help';
+    const command = new SingleFileCommand(name, fileEntry, module.module, undefined, [commands]);
+    commands.commands.push(command);
+    return command;
 }
 
 
@@ -503,9 +549,17 @@ async function loadCommands() {
         fileNamePattern: fsConfig.ignored.file.reNegated,
         dirNamePattern: fsConfig.ignored.dir.reNegated,
     });
-    if (!commandsDir || commandsDir.isEmpty()) return undefined;
+    if (!commandsDir || commandsDir.isEmpty()) {
+        return undefined;
+    }
 
     const commands = await processCommandsDirectory(commandsDir);
+    if (!commands) {
+        return undefined;
+    }
+
+    const helpCommand = await loadHelpCommand(commands.result);
+    commands.flattenedCommands.unshift(helpCommand);
 
     return commands;
 }
@@ -514,7 +568,7 @@ export async function registerCommands(client: ExtendedClient): Promise<void> {
     const loadedCommands = await loadCommands();
 
     if (!loadedCommands) {
-        logWithTime(`Failed to load any command`);
+        log.warn(`No commands has been loaded`);
         return;
     }
 
@@ -535,6 +589,6 @@ export async function registerCommands(client: ExtendedClient): Promise<void> {
             await client.application?.commands.set(commandsData);
         }
 
-        logWithTime('Commands Registered:', commandsNames);
+        log.core(`Commands registered (${commandsNames.length})`, commandsNames);
     });
 }

@@ -1,9 +1,10 @@
-import { GuildBasedChannel, Message, hideLinkEmbed, hyperlink, ChannelType } from 'discord.js';
-import { NOTIFICATIONS } from './config';
-import { BillboardScraper } from './gestiondocente/billboardScraper';
+import { ChannelType, GuildBasedChannel, Message, hideLinkEmbed, hyperlink } from 'discord.js';
 import { ExtendedClient } from '../../core/client';
 import { TaskSchedulerTrait } from '../../core/types';
 import { dev, guildId } from '../../enviroment';
+import { log } from '../../lib/logging';
+import { NOTIFICATIONS } from './config';
+import { BillboardScraper } from './gestiondocente/billboardScraper';
 
 
 const billboardNotificacionsChannel = dev ? '1138537990352810004' : '1075770845487710298';
@@ -22,7 +23,7 @@ function idFromBillboardMessage(message?: Message<true>) {
 
 async function fetchLastMessageId(channel: GuildBasedChannel) {
     if (!channel.isTextBased()) return undefined;
-    const lastMessage = (await channel.messages.fetch({ limit: 1 }).then(messages => messages.first()).catch((e) => { console.error(e); return undefined; }));
+    const lastMessage = (await channel.messages.fetch({ limit: 1 }).then(messages => messages.first()).catch((e) => { log.error(e); return undefined; }));
     return idFromBillboardMessage(lastMessage);
 }
 
@@ -54,12 +55,12 @@ export async function initializeScrapers(client: ExtendedClient): Promise<void> 
                     },
                     color: NOTIFICATIONS.gestiondocente.embedColorInt,
                 }]
-            }).catch(console.error);
+            }).catch(log.error);
 
             // Discord rate limit message crossposting at 10 per hour, i didn't find a way to check if the rate limit is reached,
             // anyway, the libraria queue the requests and send them when the rate limit is over
             if (message && message.crosspostable && message.channel.type === ChannelType.GuildAnnouncement) {
-                message.crosspost().catch(console.error);
+                message.crosspost().catch(log.error);
             }
         }
     });

@@ -3,5 +3,9 @@ import { GroupSetupDefinition } from '../+type';
 
 
 export const config = {
-    permissions: [PermissionFlagsBits.Administrator]
+    permissions: [PermissionFlagsBits.Administrator],
+    description: {
+        "es-ES": `Comandos para administrar el bot y el servidor.`,
+        "en-US": `Commands to manage the bot and the server.`
+    }
 } satisfies GroupSetupDefinition;

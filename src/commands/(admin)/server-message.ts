@@ -1,6 +1,8 @@
 import { APIEmbed, Attachment, channelMention, ChannelType, SlashCommandBuilder } from 'discord.js';
 import { SingleFileCommandDefinition } from '../+type';
+import { GUILD } from '../../botConfig';
 import { schema } from '../../lib';
+import { log } from '../../lib/logging';
 
 
 const MAX_EMBED_OPTIONS = 5;
@@ -31,6 +33,12 @@ const commandData = new SlashCommandBuilder()
     .addBooleanOption(opt => opt
         .setName('everyone')
         .setDescription('If the message should mention everyone, default false')
+    )
+    .addIntegerOption(opt => opt
+        .setName('embeds-color')
+        .setDescription(`Color for the embeds, default ${GUILD.EMBED.COLOR_INT}`)
+        .setMinValue(0)
+        .setMaxValue(16777215)
     );
 
 for (let i = 0; i < MAX_EMBED_OPTIONS; i++) {
@@ -55,6 +63,7 @@ export default (() => {
             const content = opt.getString('content');
             const isSigned = opt.getBoolean('signed') ?? true;
             const mentionEveryone = opt.getBoolean('everyone') ?? false;
+            const embedsColor = opt.getInteger('embeds-color') ?? GUILD.EMBED.COLOR_INT;
 
 
             if ((title && !content) || (!title && content)) {
@@ -108,7 +117,7 @@ export default (() => {
                     };
                     embed.timestamp = new Date().toISOString();
                 }
-                embed.color = 9709102;
+                embed.color = embedsColor;
                 return embed;
             }
 
@@ -125,7 +134,7 @@ export default (() => {
                 const promises: Promise<unknown>[] = [];
                 for (const attachment of embedsAttachments) {
                     promises.push(
-                        fetch(attachment.url).then(f => f.json()).catch(error => void console.log(error))
+                        fetch(attachment.url).then(f => f.json()).catch(log.error)
                     );
                 }
 

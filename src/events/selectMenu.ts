@@ -1,5 +1,5 @@
+import { log } from '../lib/logging';
 import type { EventDefinition } from './+type';
-
 
 export default (() => {
     return {
@@ -43,7 +43,7 @@ export default (() => {
             try {
                 await selectMenu.execute({ client, interaction });
             } catch (error) {
-                console.error(error);
+                log.error(`Error executing select menu '${customId}'\n`, error);
                 await interaction.reply({ content: 'There was an error while executing this select menu!', ephemeral: true });
             }
         }

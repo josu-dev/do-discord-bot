@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio';
+import { log } from '../../../lib/logging';
 import { RecordToTuple } from '../../../lib/utilType';
 
 
@@ -105,7 +106,7 @@ export type SearchResult = {
 };
 
 async function resolveSearch(url: string): Promise<SearchResult | undefined> {
-    const page = await fetch(url).then(r => r.text()).catch(error => { console.error(error); return undefined; });
+    const page = await fetch(url).then(r => r.text()).catch(error => { log.error(error); return undefined; });
     if (!page) return undefined;
 
     const $ = cheerio.load(page);

@@ -1,12 +1,12 @@
 import fs from 'fs';
-import { f, logWithTime } from '../../lib';
-import { readJSON, writeJSON } from '../../lib/file';
 import { INTERACTION } from '../../botConfig';
+import { f } from '../../lib';
+import { readJSON, writeJSON } from '../../lib/file';
+import { log } from '../../lib/logging';
 import { ExtendedClient } from '../client';
 import { CACHE_NAME_SUFFIX, config } from './config';
-import { DefaultSelectMenuModule, DynamicConfig, SelectMenuTrait } from './type';
-
 import { autoRol } from './menus';
+import { DefaultSelectMenuModule, DynamicConfig, SelectMenuTrait } from './type';
 
 
 const menuMap = {
@@ -29,7 +29,7 @@ function createSelectMenu(data: unknown) {
         return undefined;
     }
     if (!(data.type in menuMap)) {
-        console.log(`Error at creating select menu, type='${data.type}' is invalid`);
+        log.warn(`Error at creating select menu, type='${data.type}' is invalid`);
         return undefined;
     }
 
@@ -43,7 +43,7 @@ function createSelectMenu(data: unknown) {
     const config = validator(data);
 
     if (!config.success) {
-        console.log(`Error at validating menu config, error:${config.error}`);
+        log.warn(`Error at validating menu config, error:${config.error}`);
         return undefined;
     }
 
@@ -119,11 +119,11 @@ export async function registerSelectMenus(client: ExtendedClient): Promise<void>
             selectMenu.data.cachePath,
             (error) => {
                 if (error || !client.selectMenus.delete(selectMenu.data.messageId)) {
-                    logWithTime(`error ocurred while trying to unregister a select menu\n  customId > ${selectMenu.data.customId}\n  error > ${error}`);
+                    log.error(`error ocurred while trying to unregister a select menu\n  customId > ${selectMenu.data.customId}\n  error > ${error}`);
                     return;
                 }
 
-                logWithTime(`successfully unregistered select menu with customId='${selectMenu.data.customId}'`);
+                log.info(`successfully unregistered select menu with customId='${selectMenu.data.customId}'`);
             }
         );
     });
@@ -131,7 +131,7 @@ export async function registerSelectMenus(client: ExtendedClient): Promise<void>
     const loadedSelectMenus = await loadMenus();
 
     if (!loadedSelectMenus) {
-        logWithTime(`No menus has been loaded`);
+        log.info(`No select menus has been loaded`);
         return;
     }
 

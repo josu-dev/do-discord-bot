@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { SingleFileCommandDefinition } from '../+type';
+import { log } from '../../lib/logging';
 
 
 export default (() => {
@@ -29,7 +30,7 @@ export default (() => {
                 }
                 const errorMessage = await interaction.channel?.send({ content: 'There was an error trying to prune messages in this channel!' });
                 errorMessage && setTimeout(
-                    () => errorMessage.delete().catch(e => console.log(e)),
+                    () => errorMessage.delete().catch(e => log.error(e)),
                     7.5 * 1000
                 );
             });

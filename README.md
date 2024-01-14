@@ -13,10 +13,10 @@ A bot for managing a Discord server for students of computer science at Facultad
     - [X] Static commands
     - [X] Dynamic commands
     - [ ] Command categories
-    - [ ] Command internazionalization
+    - [X] Command internazionalization (only command usage)
     - [ ] Command cooldown
     - [ ] Command permissions
-    - [ ] Help command
+    - [X] Help command
   - Events
     - [X] Event handler
     - [ ] Dynamic events
@@ -40,7 +40,7 @@ A bot for managing a Discord server for students of computer science at Facultad
     - [X] Configuration defaults
     - [ ] Configuration persistance (file/db)
     - [ ] Configuration loader
-    - [ ] Configuration validation
+    - [X] Configuration validation
 
 - Server related
   - [X] Customizable welcome message
@@ -99,8 +99,8 @@ npm run start:prod
 **Icon meanings:**
 ```text
 📦 Category / group of commands
-📁 A command that has subcommands
-📄 A command / subcommand if its inside of 📁
+📁 A command defined as a set of files
+📄 A command or subcommand if its inside of 📁
 ```
 
 **List of commands:**
@@ -114,12 +114,13 @@ npm run start:prod
 ┃ ┗ 📄 select-menu
 ┣ 📄 check-billboard
 ┣ 📄 clear-chat
+┣ 📄 member-info
 ┣ 📄 purge-channel
 ┣ 📄 say
-┗ 📄 server-message
+┣ 📄 server-message
+┗ 📄 verify-member
 📦 dev
-┣ 📄 get-commands
-┗ 📄 ping
+┗ 📄 get-commands
 📦 unlp
 ┣ 📁 bibliofi
 ┃ ┣ 📄 advanced-search
@@ -153,6 +154,8 @@ npm run start:prod
 ┣ 📄 playlists
 ┣ 📄 reminder
 ┗ 📄 rock-paper-scissors
+📄 ping
+📄 repository
 📄 server-invite
 ```
 
@@ -164,3 +167,13 @@ More info about some of the used packages:
 - [discord.js](https://discord.js.org/#/)
 - [node-html-markdown](https://github.com/crosstype/node-html-markdown)
 - [zod](https://zod.dev/)
+
+
+## License
+
+[MIT](./LICENSE)
+
+
+## Contributing
+
+Feel free to contribute to the project by opening an issue or a pull request.
