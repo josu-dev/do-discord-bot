@@ -1,6 +1,6 @@
 const express = require("express");
 import fs from "fs";
-import { logWithTime } from '../lib';
+import { log } from '../lib/logging';
 
 
 const DEFAULT_HTML = `<!DOCTYPE html>
@@ -27,7 +27,7 @@ try {
     html = fs.readFileSync(__dirname + '/index.html', 'utf8');
 } catch (e) {
     if (e instanceof Error && 'code' in e && e.code === 'ENOENT') {
-        logWithTime(`Web server: index.html not found, using default html`);
+        log.core(`Web server: index.html not found, using default html`);
         html = DEFAULT_HTML;
     } else {
         throw e;
@@ -46,12 +46,12 @@ function initWebServer() {
     app.get("/", (req, res) => res.type('html').send(html));
 
     const server = app.listen(PORT, () => {
-        logWithTime(`Web server: listening on port ${PORT}`);
+        log.core(`Web server: listening on port ${PORT}`);
     });
 
     server.keepAliveTimeout = 120 * 1000;
     server.headersTimeout = 120 * 1000;
-    logWithTime(`Web server: initialized on port ${PORT}`);
+    log.core(`Web server: initialized on port ${PORT}`);
 }
 
 
