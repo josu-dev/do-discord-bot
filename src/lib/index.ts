@@ -1,13 +1,10 @@
 import * as file from './file';
+import * as logging from './logging';
 import * as schema from './schema';
 import * as utilType from './utilType';
-export { file as f, schema, utilType as ut };
 
 
-const dateFormater = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
-export function logWithTime(...args: { toString: () => string; }[]) {
-    console.log('[' + dateFormater.format(Date.now()) + ']', ...args);
-}
+export { file as f, logging as log, schema, utilType as ut };
 
 export function tsToRawHsMinS(ts: number) {
     return ts < 1_000 ? '0s' :

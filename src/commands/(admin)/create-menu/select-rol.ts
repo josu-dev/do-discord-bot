@@ -1,7 +1,8 @@
-import { ChannelType, Role, TextBasedChannel, ComponentType, codeBlock, BaseMessageOptions, SlashCommandSubcommandBuilder } from 'discord.js';
-import { SubCommandDefinition } from './+command';
-import { dynamicRegisterSelectMenu, TYPES } from '../../../core/selectMenu/selectMenu';
+import { BaseMessageOptions, ChannelType, ComponentType, Role, SlashCommandSubcommandBuilder, TextBasedChannel, codeBlock } from 'discord.js';
+import { TYPES, dynamicRegisterSelectMenu } from '../../../core/selectMenu/selectMenu';
 import { schema } from '../../../lib';
+import { log } from '../../../lib/logging';
+import { SubCommandDefinition } from './+command';
 
 
 const MAX_ROL_OPTIONS = 10;
@@ -121,7 +122,7 @@ export default (() => {
             }
 
             if (embed) {
-                const json = await fetch(embed.url).then(f => f.json()).catch(error => void console.log(error));
+                const json = await fetch(embed.url).then(f => f.json()).catch(log.error);
                 const parsed = schema.embedSchema.safeParse(json);
                 if (!parsed.success) {
                     return interaction.editReply({

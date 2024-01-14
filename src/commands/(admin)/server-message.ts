@@ -2,6 +2,7 @@ import { APIEmbed, Attachment, channelMention, ChannelType, SlashCommandBuilder 
 import { SingleFileCommandDefinition } from '../+type';
 import { GUILD } from '../../botConfig';
 import { schema } from '../../lib';
+import { log } from '../../lib/logging';
 
 
 const MAX_EMBED_OPTIONS = 5;
@@ -133,7 +134,7 @@ export default (() => {
                 const promises: Promise<unknown>[] = [];
                 for (const attachment of embedsAttachments) {
                     promises.push(
-                        fetch(attachment.url).then(f => f.json()).catch(error => void console.log(error))
+                        fetch(attachment.url).then(f => f.json()).catch(log.error)
                     );
                 }
 

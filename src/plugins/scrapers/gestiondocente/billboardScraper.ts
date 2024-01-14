@@ -1,7 +1,8 @@
-import { Agent } from 'https';
 import axios from 'axios';
+import { Agent } from 'https';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
-import { f, logWithTime } from '../../../lib';
+import { f } from '../../../lib';
+import { log } from '../../../lib/logging';
 
 
 type htmlString = string;
@@ -199,7 +200,7 @@ export class BillboardScraper {
 
     onUpdate(listener: UpdateListener) {
         if (this.#updateListeners.includes(listener)) {
-            throw new Error(`scraper > already listening with ${listener.toString()}`);
+            throw new Error(`BillboardScraper already listening with ${listener.toString()}`);
         }
         this.#updateListeners.push(listener);
     }
@@ -220,7 +221,7 @@ export class BillboardScraper {
             }
         }
         if (lastUpdateIndex === 0) {
-            logWithTime(`scraper: no updates on gestiondocente`);
+            log.info(`No updates on gestiondocente`);
             return;
         }
         if (lastUpdateIndex === -1) {
@@ -249,7 +250,7 @@ export class BillboardScraper {
             listener(newMessages, this);
         }
 
-        logWithTime(`scraper: ${newMessages.length} new messages on gestion docente`);
+        log.info(`${newMessages.length} new messages on gestion docente`);
     }
 
     #loadCache() {
@@ -270,7 +271,7 @@ export class BillboardScraper {
                 latestIds: this.messagesIds.items()
             }
         )) return;
-        console.error('scraper > Error while trying to save billboardScraper local cache');
+        log.error('Error while trying to save billboardScraper local cache');
     }
 
     async start(lastSendedId?: string) {
@@ -337,74 +338,3 @@ export async function checkBillboardEndpoint() {
         errorMessage: response.message
     } as const;
 }
-
-
-
-    // async update(count: number = 5) {
-    //     const response = await this.#fetchMessages(count);
-    //     if (!response.success || response.messages.length === 0) return;
-
-    //     this.availableToFetch = response.availableToFetch;
-
-    //     const lastUpdateIndex = response.messages.findIndex(message => message.id === this.messagesIds.first());
-    //     for (let i = 0; i < response.messages.length; i++) {
-    //         if (response.messages[i].id === this.messagesIds.first()) {
-    //             console.log(`scraper > last update found at index ${i}`);
-    //             break;
-    //         }
-
-    //     }
-    //     if (lastUpdateIndex === 0) {
-    //         logWithTime(`scraper: no updates on gestiondocente`);
-    //         return;
-    //     }
-    //     console.log(JSON.stringify(response.messages, null, 2));
-    //     console.log(`scraper > last update index: ${lastUpdateIndex}`);
-    //     console.log(response.messages[lastUpdateIndex]);
-    //     if (lastUpdateIndex === -1) {
-    //         console.log(`scraper > last update not found, fetching more messages...`);
-    //         const extendedResponse = await this.#fetchMessages(10, count);
-    //         if (extendedResponse.success)
-    //             response.messages.push(...extendedResponse.messages);
-    //     }
-
-    //     const endSliceIndex = lastUpdateIndex > 0 ? lastUpdateIndex : undefined;
-    //     const newMessages = response.messages.slice(0, endSliceIndex);
-    //     for (const message of [...newMessages].reverse()) {
-    //         this.messagesMap.set(message.id, message);
-    //         const removed = this.messagesIds.push(message.id);
-    //         if (removed)
-    //             this.messagesMap.delete(removed[0]);
-    //     }
-
-    //     for (const listener of this.#updateListeners) {
-    //         listener(newMessages, this);
-    //     }
-
-    //     logWithTime(`scraper: ${newMessages.length} new messages on gestion docente`);
-    //     // this.#saveCache();
-    // }
-
-    // for (const message of messages.reverse()) {
-    //     if (message.canceled) continue;
-
-    //     await channel.send({
-    //         embeds: [{
-    //             title: `${message.cathedra} | ${message.title}`,
-    //             description: message.content,
-    //             fields: message.attachments.map((attachment, index) => ({
-    //                 name: `Adjunto ${index + 1}`,
-    //                 value: hyperlink(attachment.name, hideLinkEmbed(attachment.publicUrl ?? 'error con el link'))
-    //             })),
-    //             url: `https://gestiondocente.info.unlp.edu.ar/cartelera/#form[materia]=&`,
-    //             color: NOTIFICATIONS.gestiondocente.embedColorInt,
-    //             footer: {
-    //                 text: `${message.author} - ${message.creationDate}`
-    //             },
-    //             author: {
-    //                 name: `Cartelera | Gestion Docente`,
-    //                 icon_url: `https://www.info.unlp.edu.ar/wp-content/uploads/2019/07/logoo-300x300.jpg`
-    //             },
-    //         }]
-    //     });
-    // }

@@ -1,7 +1,7 @@
 import { codeBlock, SlashCommandSubcommandBuilder } from 'discord.js';
-import { SubCommandDefinition } from './+command';
 import fs from 'fs';
-import { logWithTime } from '../../../lib';
+import { log } from '../../../lib/logging';
+import { SubCommandDefinition } from './+command';
 
 
 export default (() => {
@@ -36,12 +36,12 @@ export default (() => {
                 deletedSelectMenu.data.cachePath,
                 (error) => {
                     if (error || !client.selectMenus.delete(deletedSelectMenu.data.messageId)) {
-                        logWithTime(`error ocurred while trying to unregister a select menu\n  customId > ${deletedSelectMenu.data.customId}\n  error > ${error}`);
+                        log.error(`error ocurred while trying to unregister a select menu\n  customId > ${deletedSelectMenu.data.customId}\n  error > ${error}`);
                         interaction.editReply(`Error, something happend while removing selectMenu with messageId > ${messageId} and customId > ${deletedSelectMenu.data.customId}`);
                         return;
                     }
 
-                    logWithTime(`successfully unregistered select menu with messageId=${messageId} and customId=${deletedSelectMenu.data.customId}`);
+                    log.info(`successfully unregistered select menu with messageId=${messageId} and customId=${deletedSelectMenu.data.customId}`);
                     interaction.editReply(`Succesfully deleted selectMenu:\n${codeBlock('json', JSON.stringify(deletedSelectMenu!.data, null, 2))}`);
                 }
             );

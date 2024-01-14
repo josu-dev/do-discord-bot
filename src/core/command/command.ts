@@ -2,7 +2,8 @@ import { ApplicationCommandDataResolvable, LocalizationMap, SlashCommandBuilder 
 import { z } from 'zod';
 import { INTERACTION } from '../../botConfig';
 import { dev, guildId } from '../../enviroment';
-import { f, logWithTime } from '../../lib';
+import { f } from '../../lib';
+import { log } from '../../lib/logging';
 import { ExtendedClient } from '../client';
 import { fsConfig } from './config';
 import { CommandCallbackArgs, CommandPermissions, GenericSubCommandDefinition, GenericSubCommandModule, GroupSetupDefinition, GroupSetupModule, MultiFileCommandDefinition, MultiFileCommandModule, SingleFileCommandDefinition, SingleFileCommandModule, SlashCommandTrait, SubCommandGroupDefinition, SubCommandGroupModule } from './type';
@@ -84,7 +85,7 @@ const groupSetupSchema = z.object({
 
 
 async function proccessReservedEntry(entry: f.EntryDirectory | f.EntryFile, accumulatedSetup: AccumulatedSetup) {
-    // logWithTime(`reserved entry not processed, entry:\n${JSON.stringify(entry, null, 2)}\n`);
+    // log.dev(`reserved entry not processed, entry:\n${JSON.stringify(entry, null, 2)}\n`);
 }
 
 
@@ -105,7 +106,7 @@ async function processSubCommandGroup(directory: f.EntryDirectory): Promise<RawS
 
     const setupModule = await f.importModule<SubCommandGroupModule>(setupEntry.absolutePath, subCommandGroupSchema);
     if (!setupModule.success) {
-        console.log(`import error: ${setupModule.error}\n  path > ${setupEntry.absolutePath}\n  exception? > ${setupModule.exception?.cause ?? setupModule.exception?.stack}`);
+        log.warn(`import error: ${setupModule.error}\n  path > ${setupEntry.absolutePath}\n  exception? > ${setupModule.exception?.cause ?? setupModule.exception?.stack}`);
         return undefined;
     }
 
@@ -121,7 +122,7 @@ async function processSubCommandGroup(directory: f.EntryDirectory): Promise<RawS
 
         const subCommandModule = await f.importModule<GenericSubCommandModule>(entry.absolutePath, subCommandSchema);
         if (!subCommandModule.success) {
-            console.log(`import error: ${subCommandModule.error}\n  path > ${entry.absolutePath}\n  exception? > ${subCommandModule.exception?.cause ?? subCommandModule.exception?.stack}`);
+            log.warn(`import error: ${subCommandModule.error}\n  path > ${entry.absolutePath}\n  exception? > ${subCommandModule.exception?.cause ?? subCommandModule.exception?.stack}`);
             continue;
         }
 
@@ -129,7 +130,7 @@ async function processSubCommandGroup(directory: f.EntryDirectory): Promise<RawS
     }
 
     if (subCommands.length === 0) {
-        console.log(`skiped empty directory while loading commands at '${directory.absolutePath}'`);
+        log.warn(`skiped empty directory while loading commands at '${directory.absolutePath}'`);
         return undefined;
     }
 
@@ -267,7 +268,7 @@ async function proccesMultiFileCommand(directory: f.EntryDirectory, accumulatedS
 
     const setupModule = await f.importModule<MultiFileCommandModule>(setupEntry.absolutePath, multiFileCommandSchema);
     if (!setupModule.success) {
-        console.log(`import error: ${setupModule.error}\n  path > ${setupEntry.absolutePath}\n  exception? > ${setupModule.exception?.cause ?? setupModule.exception?.stack}`);
+        log.warn(`import error: ${setupModule.error}\n  path > ${setupEntry.absolutePath}\n  exception? > ${setupModule.exception?.cause ?? setupModule.exception?.stack}`);
         return undefined;
     }
 
@@ -291,7 +292,7 @@ async function proccesMultiFileCommand(directory: f.EntryDirectory, accumulatedS
 
         const subCommandModule = await f.importModule<GenericSubCommandModule>(entry.absolutePath, subCommandSchema);
         if (!subCommandModule.success) {
-            console.log(`import error: ${subCommandModule.error}\n  path > ${entry.absolutePath}\n  exception? > ${subCommandModule.exception?.cause ?? subCommandModule.exception?.stack}`);
+            log.warn(`import error: ${subCommandModule.error}\n  path > ${entry.absolutePath}\n  exception? > ${subCommandModule.exception?.cause ?? subCommandModule.exception?.stack}`);
             continue;
         }
 
@@ -299,7 +300,7 @@ async function proccesMultiFileCommand(directory: f.EntryDirectory, accumulatedS
     }
 
     if (subCommandsGroups.length === 0 && subCommands.length === 0) {
-        console.log(`skiped empty directory while loading commands at '${directory.absolutePath}'`);
+        log.warn(`skiped empty directory while loading commands at '${directory.absolutePath}'`);
         return undefined;
     }
 
@@ -422,7 +423,7 @@ async function processDirectoryGroup(directory: f.EntryDirectory, accumulatedSet
 
         const commandModule = await f.importModule<SingleFileCommandModule>(entry.absolutePath, singleFileCommandSchema);
         if (!commandModule.success) {
-            console.log(`import error: ${commandModule.error}\n  path > ${entry.absolutePath}\n  exception? > ${commandModule.exception?.cause ?? commandModule.exception?.stack}`);
+            log.warn(`import error: ${commandModule.error}\n  path > ${entry.absolutePath}\n  exception? > ${commandModule.exception?.cause ?? commandModule.exception?.stack}`);
             continue;
         }
 
@@ -431,7 +432,7 @@ async function processDirectoryGroup(directory: f.EntryDirectory, accumulatedSet
     }
 
     if (innerGroups.length === 0 && commands.length === 0) {
-        console.log(`skiped empty directory while loading commands at '${directory.absolutePath}'`);
+        log.warn(`skiped empty directory while loading commands at '${directory.absolutePath}'`);
         return undefined;
     }
 
@@ -492,7 +493,7 @@ async function processCommandsDirectory(baseDir: f.EntryDirectory) {
 
         const commandModule = await f.importModule<SingleFileCommandModule>(entry.absolutePath, singleFileCommandSchema);
         if (!commandModule.success) {
-            console.log(`import error: ${commandModule.error}\n  path > ${entry.absolutePath}\n  exception? > ${commandModule.exception?.cause ?? commandModule.exception?.stack}`);
+            log.warn(`import error: ${commandModule.error}\n  path > ${entry.absolutePath}\n  exception? > ${commandModule.exception?.cause ?? commandModule.exception?.stack}`);
             continue;
         }
 
@@ -501,7 +502,7 @@ async function processCommandsDirectory(baseDir: f.EntryDirectory) {
     }
 
     if (innerGroups.length === 0 && commands.length === 0) {
-        console.log(`skiped empty directory while loading commands at '${baseDirCopy.absolutePath}'`);
+        log.warn(`skiped empty directory while loading commands at '${baseDirCopy.absolutePath}'`);
         return undefined;
     }
 
@@ -567,7 +568,7 @@ export async function registerCommands(client: ExtendedClient): Promise<void> {
     const loadedCommands = await loadCommands();
 
     if (!loadedCommands) {
-        logWithTime(`Failed to load any command`);
+        log.warn(`No commands has been loaded`);
         return;
     }
 
@@ -588,6 +589,6 @@ export async function registerCommands(client: ExtendedClient): Promise<void> {
             await client.application?.commands.set(commandsData);
         }
 
-        logWithTime(`Commands Registered (${commandsNames.length}):`, commandsNames);
+        log.core(`Commands registered (${commandsNames.length})`, commandsNames);
     });
 }

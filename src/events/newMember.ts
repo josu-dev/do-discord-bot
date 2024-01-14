@@ -1,6 +1,7 @@
 import { spoiler, userMention } from 'discord.js';
 import { GUILD } from '../botConfig';
 import { dev } from '../enviroment';
+import { log } from '../lib/logging';
 import type { EventDefinition } from './+type';
 
 
@@ -43,15 +44,15 @@ export default (() => {
             catch (error) {
                 if (error instanceof TypeError) {
                     if (error.message.includes('fetch failed')) {
-                        console.error(`Error fetching welcome image for ${member.user.tag} (${member.user.id})`);
+                        log.error(`Error fetching welcome image for ${member.user.tag} (${member.user.id})`);
                     }
                     else {
-                        console.error(`Error sending welcome image for ${member.user.tag} (${member.user.id})\n`, error);
+                        log.error(`Error sending welcome image for ${member.user.tag} (${member.user.id})\n`, error);
                     }
                     await channel.send(GUILD.WELCOME.FALLBACK_MESSAGE.replaceAll(`{{mention}}`, userMention(member.id)));
                 }
                 else {
-                    console.error(`Unknown error sending welcome message for ${member.user.tag} (${member.user.id})`);
+                    log.error(`Unknown error sending welcome message for ${member.user.tag} (${member.user.id})`);
                     throw error;
                 }
             }

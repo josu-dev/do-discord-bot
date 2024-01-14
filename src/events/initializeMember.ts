@@ -1,5 +1,5 @@
 import { GUILD } from '../botConfig';
-import { logWithTime } from '../lib';
+import { log } from '../lib/logging';
 import type { EventDefinition } from './+type';
 
 
@@ -19,7 +19,7 @@ export default (() => {
 
             newMember = await newMember.roles.add(GUILD.NEW_MEMBER.ROLES);
 
-            logWithTime(`Succesfully given initial role to member:\n  id:${newMember.id}\n  tag:${newMember.user.tag}`);
+            log.info(`Succesfully given initial role to member:\n  id:${newMember.id}\n  tag:${newMember.user.tag}`);
         }
     };
 }) satisfies EventDefinition<'guildMemberUpdate'>;

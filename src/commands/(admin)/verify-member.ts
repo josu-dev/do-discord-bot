@@ -5,7 +5,7 @@ import { SingleFileCommandDefinition } from '../+type';
 import { GUILD } from '../../botConfig';
 import prisma from '../../db';
 import { dev } from '../../enviroment';
-import { logWithTime } from '../../lib';
+import { log } from '../../lib/logging';
 
 
 const VERIFIED_ROLE_ID = dev ? '1133933055422246914' : GUILD.ROLES.VERIFIED;
@@ -112,7 +112,7 @@ export default (() => {
             }
             catch (error) {
                 if (error instanceof DiscordAPIError) {
-                    logWithTime(`[ERROR] Manual verification on ${member.user.tag} failed, the bot couldn't assign the verified role. Payload: \nmember_id: ${member.id}\nlegajo: ${legajo}\ndni: ${dni}\nmember: ${JSON.stringify(member)}\nerror: ${JSON.stringify(error)}`);
+                    log.error(`Manual verification on ${member.user.tag} failed, the bot couldn't assign the verified role. Payload: \nmember_id: ${member.id}\nlegajo: ${legajo}\ndni: ${dni}\nmember: ${JSON.stringify(member)}\nerror: ${JSON.stringify(error)}`);
                     return interaction.editReply({
                         content: `An error ocurred while trying to verify the member during the role assignment`
                     });
