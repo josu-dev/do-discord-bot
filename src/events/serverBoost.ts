@@ -1,4 +1,4 @@
-import { spoiler, userMention } from 'discord.js';
+import { userMention } from 'discord.js';
 import { GUILD } from '../botConfig';
 import { dev } from '../enviroment';
 import { log } from '../lib/logging';
@@ -30,7 +30,7 @@ export default (() => {
             if (!newMember.premiumSince || oldMember.premiumSince === newMember.premiumSince) {
                 return;
             }
-            log.debug(`Server boost by ${newMember.user.tag} (${newMember.user.id})\n${oldMember.toJSON()}\n${newMember.toJSON()}`);
+            log.debug(`Server boost by ${newMember.user.tag} (${newMember.user.id})\n${JSON.stringify(oldMember.toJSON(), null, 2)}\n${JSON.stringify(newMember.toJSON(), null, 2)}`);
 
             if (!SERVER_BOOST_URL) {
                 await channel.send(GUILD.BOOST.FALLBACK_MESSAGE.replaceAll(`{{mention}}`, userMention(newMember.id)));
@@ -39,27 +39,27 @@ export default (() => {
 
             const image_url = `${SERVER_BOOST_URL}?username=${encodeURIComponent(newMember.displayName)}&avatar_id=${encodeURIComponent(newMember.user.avatar ?? '')}&user_id=${encodeURIComponent(newMember.user.id)}`;
 
-            try {
-                await channel.send({
-                    content: `${spoiler(`${userMention(newMember.id)} boosteo el servidor!`)}\n​`,
-                    files: [image_url]
-                });
-            }
-            catch (error) {
-                if (error instanceof TypeError) {
-                    if (error.message.includes('fetch failed')) {
-                        log.error(`Error fetching welcome image for ${newMember.user.tag} (${newMember.user.id})`);
-                    }
-                    else {
-                        log.error(`Error sending welcome image for ${newMember.user.tag} (${newMember.user.id})\n`, error);
-                    }
-                    await channel.send(GUILD.WELCOME.FALLBACK_MESSAGE.replaceAll(`{{mention}}`, userMention(newMember.id)));
-                }
-                else {
-                    log.error(`Unknown error sending welcome message for ${newMember.user.tag} (${newMember.user.id})`);
-                    throw error;
-                }
-            }
+            // try {
+            //     await channel.send({
+            //         content: `${spoiler(`${userMention(newMember.id)} boosteo el servidor!`)}\n​`,
+            //         files: [image_url]
+            //     });
+            // }
+            // catch (error) {
+            //     if (error instanceof TypeError) {
+            //         if (error.message.includes('fetch failed')) {
+            //             log.error(`Error fetching welcome image for ${newMember.user.tag} (${newMember.user.id})`);
+            //         }
+            //         else {
+            //             log.error(`Error sending welcome image for ${newMember.user.tag} (${newMember.user.id})\n`, error);
+            //         }
+            //         await channel.send(GUILD.WELCOME.FALLBACK_MESSAGE.replaceAll(`{{mention}}`, userMention(newMember.id)));
+            //     }
+            //     else {
+            //         log.error(`Unknown error sending welcome message for ${newMember.user.tag} (${newMember.user.id})`);
+            //         throw error;
+            //     }
+            // }
         }
     };
 }) satisfies EventDefinition<'guildMemberUpdate'>;
