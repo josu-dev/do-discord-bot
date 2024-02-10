@@ -27,10 +27,10 @@ export default (() => {
             if (!channel || channel.isDMBased() || !channel.isTextBased()) {
                 throw new Error(`Bad configuration for server boost channel, CHANNEL: ${GUILD.WELCOME.CHANNEL} is not a valid text channel of guild ${oldMember.guild.name} (${oldMember.guild.id})`);
             }
-            if (!newMember.premiumSince || oldMember.premiumSince === newMember.premiumSince) {
+            if (!newMember.premiumSince || oldMember.premiumSince?.getTime() === newMember.premiumSince.getTime()) {
                 return;
             }
-            log.debug(`Server boost by ${newMember.user.tag} (${newMember.user.id})\n${oldMember.toJSON()}\n${newMember.toJSON()}`);
+            log.debug(`Server boost by ${newMember.user.tag} (${newMember.user.id})\n${oldMember}\n${newMember}`);
 
             if (!SERVER_BOOST_URL) {
                 await channel.send(GUILD.BOOST.FALLBACK_MESSAGE.replaceAll(`{{mention}}`, userMention(newMember.id)));
