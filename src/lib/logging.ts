@@ -6,6 +6,18 @@ export function currentArgDate() {
     return argDateFormater.format(Date.now());
 }
 
+/**
+ * A simple logging utility
+ * 
+ * Log levels:
+ * - _: fatal
+ * - 1: core
+ * - 2: error
+ * - 3: warn
+ * - 4: info
+ * - 5: debug
+ * - >: dev
+ */
 export const log = {
     dev(...args: any[]) {
         if (dev) {

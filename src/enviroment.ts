@@ -36,7 +36,7 @@ else {
     _logLevel = parseInt(process.env.LOG_LEVEL);
     if (isNaN(_logLevel) || _logLevel < -1) {
         console["warn"]("[WARN] LOG_LEVEL is not a valid number, defaulting to error level");
-        _logLevel = 3;
+        _logLevel = 2;
     }
 }
 export const logLevel = _logLevel;
