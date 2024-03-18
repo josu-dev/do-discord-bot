@@ -85,7 +85,7 @@ export const GUILD = {
         FALLBACK_MESSAGE: 'Bienvenido {{mention}} al servidor!\n\nEsperamos que la comunidad te sea de ayuda y te lo pases bien con los demas estudiantes ;)',
     },
     BOOST: {
-        CHANNEL: '1075773879861121054',
+        CHANNEL: '1075765075794735126',
         IMG_GEN_URL: process.env.BOOST_IMG_GEN_URL,
         FALLBACK_MESSAGE: 'Agradescanlen a {{mention}} que acabo de boostear el servidor y eso nos beneficia a todos!',
     },
