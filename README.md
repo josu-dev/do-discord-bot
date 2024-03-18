@@ -57,7 +57,7 @@ A bot for managing a Discord server for students of computer science at Facultad
 ## Installation
 
 ```bash
-git clone https://github.com/J-Josu/do-discord-bot
+git clone https://github.com/josu-dev/do-discord-bot
 
 cd do-discord-bot
 

@@ -17,7 +17,7 @@ export const CLIENT = {
 } as const;
 
 export const REPOSITORY = {
-    URL: 'https://github.com/J-Josu/do-discord-bot',
+    URL: 'https://github.com/josu-dev/do-discord-bot',
 } as const;
 
 

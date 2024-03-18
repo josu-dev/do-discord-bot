@@ -166,11 +166,11 @@ const constantResponse = {
         ephemeral: true
     },
     web: {
-        content: `Pagina para utilizar el entorno R-Info de manera online (no autirizada ni avalada por la facultad), cortesia de Los Compañeros\nhttps://j-josu.github.io/RobotScript/`,
+        content: `Pagina para utilizar el entorno R-Info de manera online (no autirizada ni avalada por la facultad), cortesia de Los Compañeros\nhttps://josu-dev.github.io/RobotScript/`,
         ephemeral: true
     },
     docs: {
-        content: `Pagina con la documentacion sobre el lenguaje (no autirizada ni avalada por la facultad), cortesia de Los Compañeros\nhttps://j-josu.github.io/RobotScript/docs/language/`,
+        content: `Pagina con la documentacion sobre el lenguaje (no autirizada ni avalada por la facultad), cortesia de Los Compañeros\nhttps://josu-dev.github.io/RobotScript/docs/language/`,
         ephemeral: true
     },
     extension: {
