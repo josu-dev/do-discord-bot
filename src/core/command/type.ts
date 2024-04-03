@@ -1,7 +1,7 @@
 import type { APIEmbed, ChatInputCommandInteraction, InteractionReplyOptions, LocaleString, PermissionFlags, SlashCommandBuilder, SlashCommandOptionsOnlyBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandsOnlyBuilder } from 'discord.js';
 
-import { AnyTuple, Replace, Values } from '../../lib/utilType';
-import { ExtendedClient } from '../client';
+import { AnyTuple, Replace, Values } from '../../lib/utilType.js';
+import { ExtendedClient } from '../client.js';
 
 
 export const MemberType = {

@@ -1,5 +1,5 @@
-import { log } from '../lib/logging';
-import type { EventDefinition } from './+type';
+import { log } from '../lib/logging.js';
+import type { EventDefinition } from './+type.js';
 
 export default (() => {
     return {

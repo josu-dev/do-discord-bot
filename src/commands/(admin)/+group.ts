@@ -1,5 +1,5 @@
 import { PermissionFlagsBits } from 'discord.js';
-import { GroupSetupDefinition } from '../+type';
+import { GroupSetupDefinition } from '../+type.js';
 
 
 export const config = {

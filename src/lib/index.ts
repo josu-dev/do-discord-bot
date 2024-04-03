@@ -1,7 +1,7 @@
-import * as file from './file';
-import * as logging from './logging';
-import * as schema from './schema';
-import * as utilType from './utilType';
+import * as file from './file.js';
+import * as logging from './logging.js';
+import * as schema from './schema.js';
+import * as utilType from './utilType.js';
 
 
 export { file as f, logging as log, schema, utilType as ut };

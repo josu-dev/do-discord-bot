@@ -1,7 +1,7 @@
 import { APIActionRowComponent, APIEmbed, APIMessageActionRowComponent, ButtonBuilder, ButtonInteraction, ButtonStyle, CacheType, ChatInputCommandInteraction, Collection, ComponentType, GuildMember, InteractionCollector, SlashCommandBuilder, bold, italic, quote, underscore, userMention } from 'discord.js';
-import { SingleFileCommandDefinition } from '../+type';
-import { pickRandom } from '../../lib';
-import { Values } from '../../lib/utilType';
+import { SingleFileCommandDefinition } from '../+type.js';
+import { pickRandom } from '../../lib/index.js';
+import { Values } from '../../lib/utilType.js';
 
 
 const embedColor = 5793266;

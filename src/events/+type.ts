@@ -1,3 +1,3 @@
 export type {
     EventDefinition
-} from '../core/event';
+} from '../core/event/index.js';

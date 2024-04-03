@@ -1,10 +1,8 @@
-import * as dotenv from "dotenv";
-dotenv.config();
-
-import { CustomClient } from './core';
-import { log } from './lib/logging';
-import { initializeScrapers } from './plugins/scrapers';
-import { initWebServer } from './render';
+import 'dotenv/config';
+import { CustomClient } from './core/index.js';
+import { log } from './lib/logging.js';
+import { initializeScrapers } from './plugins/scrapers/index.js';
+import { initWebServer } from './render/index.js';
 
 
 const client = new CustomClient();

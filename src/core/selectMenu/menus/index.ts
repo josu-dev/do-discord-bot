@@ -1,1 +1,1 @@
-export * as autoRol from './autoRol';
+export * as autoRol from './autoRol.js';

@@ -1,11 +1,11 @@
-import { Member } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { LibsqlError } from '@libsql/client';
 import { DiscordAPIError, SlashCommandBuilder, userMention } from 'discord.js';
-import { SingleFileCommandDefinition } from '../+type';
-import { GUILD } from '../../botConfig';
-import prisma from '../../db';
-import { dev } from '../../enviroment';
-import { log } from '../../lib/logging';
+import { nanoid } from 'nanoid';
+import { SingleFileCommandDefinition } from '../+type.js';
+import { GUILD } from '../../botConfig.js';
+import { Member, db } from '../../db/index.js';
+import { dev } from '../../enviroment.js';
+import { log } from '../../lib/logging.js';
 
 
 const VERIFIED_ROLE_ID = dev ? '1133933055422246914' : GUILD.ROLES.VERIFIED;
@@ -82,19 +82,19 @@ export default (() => {
                 fetchReply: true,
             });
 
-            let dbMember: Member;
+            let dbMember: typeof Member.$inferSelect;
             try {
-                dbMember = await prisma.member.create({
-                    data: {
-                        guild_id: interaction.guildId,
-                        member_id: member.id,
-                        dni: dni,
-                        legajo: legajo,
-                    }
-                });
+                dbMember = await db.insert(Member).values([{
+                    id:nanoid(),
+                    guild_id: interaction.guildId,
+                    member_id: member.id,
+                    dni: dni,
+                    legajo: legajo,
+                }]).returning().get();
             }
             catch (error) {
-                if (error instanceof PrismaClientKnownRequestError) {
+                if (error instanceof LibsqlError) {
+                    log.error(`Manual verification on ${member.user.tag} failed, the bot couldn't insert the member into the database. Payload: \nmember_id: ${member.id}\nlegajo: ${legajo}\ndni: ${dni}\nmember: ${JSON.stringify(member)}\nerror: ${JSON.stringify(error)}`);
                     if (error.code === 'P2002') {
                         return interaction.editReply({
                             content: `A member with id \`${member.id}\` or dni \`${dni}\` or legajo \`${legajo}\` already is verified`,

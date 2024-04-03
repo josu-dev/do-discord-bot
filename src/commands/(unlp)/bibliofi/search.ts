@@ -1,7 +1,7 @@
 import { APIEmbed, InteractionEditReplyOptions, SlashCommandSubcommandBuilder, blockQuote, bold, hideLinkEmbed, hyperlink } from 'discord.js';
-import { SearchResult, SubCommandDefinition, librarySearch } from './+command';
-import { INFORMATICA } from '../+skip.config';
-import { addEphemeralOption } from '../../../lib/discordjs';
+import { INFORMATICA } from '../+skip.config.js';
+import { addEphemeralOption } from '../../../lib/discordjs.js';
+import { SearchResult, SubCommandDefinition, librarySearch } from './+command.js';
 
 
 const ratingEmoji = (rating?: number) => {

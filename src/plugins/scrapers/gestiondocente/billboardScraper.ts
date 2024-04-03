@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { Agent } from 'https';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
-import { f } from '../../../lib';
-import { log } from '../../../lib/logging';
+import { f } from '../../../lib/index.js';
+import { log } from '../../../lib/logging.js';
 
 
 type htmlString = string;
@@ -254,7 +254,7 @@ export class BillboardScraper {
     }
 
     #loadCache() {
-        const cache = f.readJSON(f.posixJoin(__dirname, BillboardScraper.#CACHE_PATH));
+        const cache = f.readJSON(f.posixJoin(import.meta.dirname, BillboardScraper.#CACHE_PATH));
         if (!cache) return false;
 
         const insecureCache = cache as LocalCache;
@@ -265,7 +265,7 @@ export class BillboardScraper {
 
     #saveCache() {
         if (f.writeJSON(
-            f.posixJoin(__dirname, BillboardScraper.#CACHE_PATH),
+            f.posixJoin(import.meta.dirname, BillboardScraper.#CACHE_PATH),
             {
                 availableToFetch: this.#availableToFetch,
                 latestIds: this.messagesIds.items()

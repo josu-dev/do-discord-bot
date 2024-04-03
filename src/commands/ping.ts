@@ -1,7 +1,7 @@
 import { inlineCode, SlashCommandBuilder } from 'discord.js';
-import { dev } from '../enviroment';
-import { log } from '../lib/logging';
-import { SingleFileCommandDefinition } from './+type';
+import { dev } from '../enviroment.js';
+import { log } from '../lib/logging.js';
+import { SingleFileCommandDefinition } from './+type.js';
 
 
 export default (() => {

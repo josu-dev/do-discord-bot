@@ -1,5 +1,5 @@
 import { bold, codeBlock, InteractionReplyOptions, SlashCommandBuilder } from 'discord.js';
-import { SingleFileCommandDefinition } from '../+type';
+import { SingleFileCommandDefinition } from '../+type.js';
 
 
 const commandData = new SlashCommandBuilder()

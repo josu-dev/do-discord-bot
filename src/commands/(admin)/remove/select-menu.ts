@@ -1,7 +1,7 @@
 import { codeBlock, SlashCommandSubcommandBuilder } from 'discord.js';
 import fs from 'fs';
-import { log } from '../../../lib/logging';
-import { SubCommandDefinition } from './+command';
+import { log } from '../../../lib/logging.js';
+import { SubCommandDefinition } from './+command.js';
 
 
 export default (() => {

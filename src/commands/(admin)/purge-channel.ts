@@ -1,5 +1,5 @@
 import { channelMention, ChannelType, SlashCommandBuilder } from 'discord.js';
-import { SingleFileCommandDefinition } from '../+type';
+import { SingleFileCommandDefinition } from '../+type.js';
 
 
 const VALID_CHANNEL_TYPES = [ChannelType.GuildText, ChannelType.GuildAnnouncement] satisfies ChannelType[];

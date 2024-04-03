@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { SingleFileCommandDefinition } from '../+type';
-import { checkBillboardEndpoint } from '../../plugins/scrapers';
+import { SingleFileCommandDefinition } from '../+type.js';
+import { checkBillboardEndpoint } from '../../plugins/scrapers/index.js';
 
 
 export default (() => {

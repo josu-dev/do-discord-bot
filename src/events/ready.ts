@@ -1,8 +1,8 @@
-import { PRESENCES } from '../botConfig';
-import { ExtendedClient } from '../core/client';
-import { pickRandom } from '../lib';
-import { log } from '../lib/logging';
-import type { EventDefinition } from './+type';
+import { PRESENCES } from '../botConfig.js';
+import { ExtendedClient } from '../core/client.js';
+import { pickRandom } from '../lib/index.js';
+import { log } from '../lib/logging.js';
+import type { EventDefinition } from './+type.js';
 
 
 function updatePresence(client: ExtendedClient) {

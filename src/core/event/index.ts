@@ -1,5 +1,5 @@
-export { registerEvents } from './event';
+export { registerEvents } from './event.js';
 
 export type {
     EventDefinition
-} from './type';
+} from './type.js';

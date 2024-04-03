@@ -1,8 +1,8 @@
 import { BaseMessageOptions, ChannelType, ComponentType, Role, SlashCommandSubcommandBuilder, TextBasedChannel, codeBlock } from 'discord.js';
-import { TYPES, dynamicRegisterSelectMenu } from '../../../core/selectMenu/selectMenu';
-import { schema } from '../../../lib';
-import { log } from '../../../lib/logging';
-import { SubCommandDefinition } from './+command';
+import { TYPES, dynamicRegisterSelectMenu } from '../../../core/selectMenu/selectMenu.js';
+import { schema } from '../../../lib/index.js';
+import { log } from '../../../lib/logging.js';
+import { SubCommandDefinition } from './+command.js';
 
 
 const MAX_ROL_OPTIONS = 10;

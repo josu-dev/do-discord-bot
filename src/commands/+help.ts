@@ -1,9 +1,9 @@
 import { APIEmbed, GuildMember, LocaleString, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
-import { REPLY } from '../botConfig';
-import type { Group } from '../core/command/command';
-import { addEphemeralOption } from '../lib/discordjs';
-import { translationMap } from '../lib/intl';
-import { SingleFileCommandDefinition, SlashCommandTrait } from './+type';
+import { REPLY } from '../botConfig.js';
+import type { Group } from '../core/command/command.js';
+import { addEphemeralOption } from '../lib/discordjs.js';
+import { translationMap } from '../lib/intl.js';
+import { SingleFileCommandDefinition, SlashCommandTrait } from './+type.js';
 
 
 const commandData = new SlashCommandBuilder()

@@ -1,7 +1,7 @@
 import { APIApplicationCommandOptionChoice, APIEmbed, SlashCommandSubcommandBuilder, codeBlock } from 'discord.js';
-import { SubCommandDefinition } from './+command';
-import { INFORMATICA } from '../+skip.config';
-import { addEphemeralOption } from '../../../lib/discordjs';
+import { INFORMATICA } from '../+skip.config.js';
+import { addEphemeralOption } from '../../../lib/discordjs.js';
+import { SubCommandDefinition } from './+command.js';
 
 
 type FinalField = {

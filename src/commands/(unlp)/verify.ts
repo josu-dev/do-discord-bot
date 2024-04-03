@@ -1,16 +1,17 @@
-import { Member } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { LibsqlError } from '@libsql/client';
 import { DiscordAPIError, SlashCommandBuilder } from 'discord.js';
 import jsQR from "jsqr";
-import { OPS, VerbosityLevel, getDocument } from 'pdfjs-dist';
-import type { PDFDocumentProxy, TextContent, TextItem } from "pdfjs-dist/types/src/display/api";
+import { nanoid } from 'nanoid';
+import pdfjs from 'pdfjs-dist';
+import type { PDFDocumentProxy, TextContent, TextItem } from "pdfjs-dist/types/src/display/api.js";
 import { z } from 'zod';
-import { SingleFileCommandDefinition } from '../+type';
-import { GUILD } from '../../botConfig';
-import prisma from '../../db';
-import { dev } from '../../enviroment';
-import { log } from '../../lib/logging';
-import { Replace } from '../../lib/utilType';
+import { SingleFileCommandDefinition } from '../+type.js';
+import { GUILD } from '../../botConfig.js';
+import { Member, db } from '../../db/index.js';
+import { dev } from '../../enviroment.js';
+import { log } from '../../lib/logging.js';
+import { Replace } from '../../lib/utilType.js';
+const { OPS, VerbosityLevel, getDocument } = pdfjs;
 
 
 const commandData = new SlashCommandBuilder()
@@ -213,6 +214,7 @@ export default (() => {
                     }
 
                     // https://github.com/cozmo/jsQR
+                    // @ts-expect-error
                     const qrCode = jsQR(data, arg.width, arg.height, {});
                     if (!qrCode) {
                         return interaction.editReply({
@@ -243,19 +245,18 @@ export default (() => {
                         });
                     }
 
-                    let member: Member;
+                    let member: typeof Member.$inferSelect;
                     try {
-                        member = await prisma.member.create({
-                            data: {
-                                guild_id: interaction.guildId,
-                                member_id: interaction.member.id,
-                                legajo: textLegajo,
-                                dni: textDNI,
-                            }
-                        });
+                        member= await db.insert(Member).values([{
+                            id:nanoid(),
+                            guild_id: interaction.guildId,
+                            member_id: interaction.member.id,
+                            dni: textDNI,
+                            legajo: textLegajo,
+                        }]).returning().get();
                     }
                     catch (error) {
-                        if (error instanceof PrismaClientKnownRequestError) {
+                        if (error instanceof LibsqlError) {
                             if (error.code === 'P2002') {
                                 return interaction.editReply({
                                     content: `Ya estas verificado o tus credenciales ya fueron usadas, contacta a un administrador si crees que esto es un error`,

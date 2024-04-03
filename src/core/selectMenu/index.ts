@@ -1,2 +1,2 @@
-export { SelectMenuTrait } from './type';
-export { registerSelectMenus } from './selectMenu';
+export { registerSelectMenus } from './selectMenu.js';
+export { SelectMenuTrait } from './type.js';

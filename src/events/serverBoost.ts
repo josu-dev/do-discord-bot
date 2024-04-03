@@ -1,8 +1,8 @@
 import { spoiler, userMention } from 'discord.js';
-import { GUILD } from '../botConfig';
-import { dev } from '../enviroment';
-import { log } from '../lib/logging';
-import type { EventDefinition } from './+type';
+import { GUILD } from '../botConfig.js';
+import { dev } from '../enviroment.js';
+import { log } from '../lib/logging.js';
+import type { EventDefinition } from './+type.js';
 
 
 const SERVER_BOOST_CHANNEL = dev

@@ -1,6 +1,6 @@
 import { SlashCommandSubcommandBuilder } from 'discord.js';
-import { SubCommandDefinition } from './+command';
-import { tsToRawHsMinS } from '../../../lib';
+import { tsToRawHsMinS } from '../../../lib/index.js';
+import { SubCommandDefinition } from './+command.js';
 
 
 export default ((runningPomodoros) => {

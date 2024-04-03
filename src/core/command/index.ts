@@ -1,12 +1,6 @@
-export { registerCommands } from './command';
+export { registerCommands } from './command.js';
 
 export type {
-    SlashCommandTrait,
-    GroupSetupDefinition,
-    SingleFileCommandDefinition,
-    MultiFileCommandDefinition,
-    GenericSubCommandDefinition as BaseSubCommandDefinition,
-    SubCommandDefinitionFrom,
-    SubCommandGroupDefinition,
-    InteractionReply,
-} from './type';
+    GenericSubCommandDefinition as BaseSubCommandDefinition, GroupSetupDefinition, InteractionReply, MultiFileCommandDefinition, SingleFileCommandDefinition, SlashCommandTrait, SubCommandDefinitionFrom,
+    SubCommandGroupDefinition
+} from './type.js';

@@ -1,10 +1,4 @@
 export type {
-    SlashCommandTrait,
-    GroupSetupDefinition,
-    SingleFileCommandDefinition,
-    MultiFileCommandDefinition,
-    BaseSubCommandDefinition,
-    SubCommandDefinitionFrom,
-    SubCommandGroupDefinition,
-    InteractionReply,
-} from '../core/command';
+    BaseSubCommandDefinition, GroupSetupDefinition, InteractionReply, MultiFileCommandDefinition, SingleFileCommandDefinition, SlashCommandTrait, SubCommandDefinitionFrom,
+    SubCommandGroupDefinition
+} from '../core/command/index.js';

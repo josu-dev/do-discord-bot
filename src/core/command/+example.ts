@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 // Replace with './+type' as the path when copying
-import { SingleFileCommandDefinition } from './type';
+import { SingleFileCommandDefinition } from './type.js';
 // Use relative imports for any value import outside nodemodules
 
 

@@ -1,5 +1,5 @@
 import { APIEmbed, bold, hideLinkEmbed, hyperlink, italic } from 'discord.js';
-import { INFORMATICA } from '../+skip.config';
+import { INFORMATICA } from '../+skip.config.js';
 
 
 export function setEmbedDefaults(embed: APIEmbed) {

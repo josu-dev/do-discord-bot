@@ -1,5 +1,5 @@
 import { bold, hyperlink, hideLinkEmbed, italic, SlashCommandBuilder } from 'discord.js';
-import { SingleFileCommandDefinition } from '../+type';
+import { SingleFileCommandDefinition } from '../+type.js';
 
 
 const playlists = [

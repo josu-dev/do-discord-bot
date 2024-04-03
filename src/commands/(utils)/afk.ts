@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { SingleFileCommandDefinition } from '../+type';
+import { SingleFileCommandDefinition } from '../+type.js';
 
 
 export default (() => {

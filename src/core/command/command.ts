@@ -1,12 +1,12 @@
 import { ApplicationCommandDataResolvable, LocalizationMap, SlashCommandBuilder } from 'discord.js';
 import { z } from 'zod';
-import { INTERACTION } from '../../botConfig';
-import { dev, guildId } from '../../enviroment';
-import { f } from '../../lib';
-import { log } from '../../lib/logging';
-import { ExtendedClient } from '../client';
-import { fsConfig } from './config';
-import { CommandCallbackArgs, CommandPermissions, GenericSubCommandDefinition, GenericSubCommandModule, GroupSetupDefinition, GroupSetupModule, MultiFileCommandDefinition, MultiFileCommandModule, SingleFileCommandDefinition, SingleFileCommandModule, SlashCommandTrait, SubCommandGroupDefinition, SubCommandGroupModule } from './type';
+import { INTERACTION } from '../../botConfig.js';
+import { dev, guildId } from '../../enviroment.js';
+import { f } from '../../lib/index.js';
+import { log } from '../../lib/logging.js';
+import { ExtendedClient } from '../client.js';
+import { fsConfig } from './config.js';
+import { CommandCallbackArgs, CommandPermissions, GenericSubCommandDefinition, GenericSubCommandModule, GroupSetupDefinition, GroupSetupModule, MultiFileCommandDefinition, MultiFileCommandModule, SingleFileCommandDefinition, SingleFileCommandModule, SlashCommandTrait, SubCommandGroupDefinition, SubCommandGroupModule } from './type.js';
 
 
 const singleFileCommandSchema = z.object({
@@ -519,7 +519,7 @@ async function processCommandsDirectory(baseDir: f.EntryDirectory) {
 async function loadHelpCommand(commands: Group): Promise<SingleFileCommand> {
     const fileEntry = f.fileEntry(
         f.posixJoin(
-            ...f.splitEntrys(__dirname), '..', '..', INTERACTION.COMMANDS.path, (dev ? '+help.ts' : '+help.js')
+            ...f.splitEntrys(import.meta.dirname), '..', '..', INTERACTION.COMMANDS.path, (dev ? '+help.ts' : '+help.js')
         )
     );
     if (!fileEntry) {
@@ -542,7 +542,7 @@ async function loadHelpCommand(commands: Group): Promise<SingleFileCommand> {
 
 async function loadCommands() {
     const COMMANDS_ABS_DIR = f.posixJoin(
-        ...f.splitEntrys(__dirname), '..', '..', INTERACTION.COMMANDS.path
+        ...f.splitEntrys(import.meta.dirname), '..', '..', INTERACTION.COMMANDS.path
     );
     const commandsDir = f.deepScan({
         absolutePath: COMMANDS_ABS_DIR,
