@@ -1,4 +1,4 @@
-import { dev, logLevel } from '../enviroment';
+import { dev, logLevel } from '../enviroment.js';
 
 
 const argDateFormater = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });

@@ -1,5 +1,5 @@
-import { ActivityType, Partials, PresenceData } from 'discord.js';
-import env from './enviroment';
+import { ActivityType, GatewayIntentBits, Partials, PresenceData } from 'discord.js';
+import env from './enviroment.js';
 
 
 export const INTERACTION = {
@@ -12,7 +12,7 @@ export const INTERACTION = {
 } as const;
 
 export const CLIENT = {
-    INTENTS: 3276799,
+    INTENTS: [GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildModeration, GatewayIntentBits.GuildPresences, GatewayIntentBits.Guilds],
     PARTIALS: [Partials.Channel, Partials.Message, Partials.Reaction],
 } as const;
 

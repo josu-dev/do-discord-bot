@@ -1,7 +1,7 @@
 import { AnySelectMenuInteraction } from 'discord.js';
 import { z } from 'zod';
-import { MutableRecord, OptionalField } from '../../lib/utilType';
-import { ExtendedClient } from '../client';
+import { MutableRecord, OptionalField } from '../../lib/utilType.js';
+import { ExtendedClient } from '../client.js';
 
 
 type BaseConfig = {

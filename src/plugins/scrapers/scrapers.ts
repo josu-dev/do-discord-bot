@@ -1,10 +1,10 @@
 import { ChannelType, GuildBasedChannel, Message, hideLinkEmbed, hyperlink } from 'discord.js';
-import { ExtendedClient } from '../../core/client';
-import { TaskSchedulerTrait } from '../../core/types';
-import { dev, guildId } from '../../enviroment';
-import { log } from '../../lib/logging';
-import { NOTIFICATIONS } from './config';
-import { BillboardScraper } from './gestiondocente/billboardScraper';
+import { ExtendedClient } from '../../core/client.js';
+import { TaskSchedulerTrait } from '../../core/types.js';
+import { dev, guildId } from '../../enviroment.js';
+import { log } from '../../lib/logging.js';
+import { NOTIFICATIONS } from './config.js';
+import { BillboardScraper } from './gestiondocente/billboardScraper.js';
 
 
 const billboardNotificacionsChannel = dev ? '1138537990352810004' : '1075770845487710298';

@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { MultiFileCommandDefinition, SubCommandDefinitionFrom } from '../../+type';
-import type { TaskProgramerTrait } from '../../../core/types';
-import { Values } from '../../../lib/utilType';
+import { MultiFileCommandDefinition, SubCommandDefinitionFrom } from '../../+type.js';
+import type { TaskProgramerTrait } from '../../../core/types.js';
+import { Values } from '../../../lib/utilType.js';
 
 
 export const pomodoroEvent = {

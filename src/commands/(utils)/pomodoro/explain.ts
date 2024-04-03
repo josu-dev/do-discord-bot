@@ -1,5 +1,5 @@
 import { bold, italic, SlashCommandSubcommandBuilder } from 'discord.js';
-import { SubCommandDefinition } from './+command';
+import { SubCommandDefinition } from './+command.js';
 
 
 const infoMessage = `

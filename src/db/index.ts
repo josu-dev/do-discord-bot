@@ -1,7 +1,11 @@
-import { PrismaClient } from '@prisma/client';
+import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/libsql";
 
-const prisma = new PrismaClient();
+const turso = createClient({
+  url: process.env.TURSO_DATABASE_URL!,
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
 
-export { prisma };
+export const db = drizzle(turso);
 
-export default prisma;
+export * from "./schema.js";

@@ -1,4 +1,4 @@
-import { entryType } from '../lib/file';
+import { entryType } from '../lib/file.js';
 
 
 const directoryAndFile = `DIRECTORY_AND_FILE`;

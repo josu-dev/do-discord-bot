@@ -1,7 +1,7 @@
 import { bold, Invite, SlashCommandBuilder } from 'discord.js';
-import { GUILD } from '../botConfig';
-import { addEphemeralOption } from '../lib/discordjs';
-import { SingleFileCommandDefinition } from './+type';
+import { GUILD } from '../botConfig.js';
+import { addEphemeralOption } from '../lib/discordjs.js';
+import { SingleFileCommandDefinition } from './+type.js';
 
 
 const commandData = new SlashCommandBuilder()

@@ -1,5 +1,5 @@
 import { AttachmentBuilder, SlashCommandBuilder } from 'discord.js';
-import { SingleFileCommandDefinition } from '../+type';
+import { SingleFileCommandDefinition } from '../+type.js';
 
 
 // In order to stringuify the object must replace/implement toJSON of bigint object

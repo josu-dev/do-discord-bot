@@ -1,6 +1,6 @@
-import { GUILD } from '../botConfig';
-import { log } from '../lib/logging';
-import type { EventDefinition } from './+type';
+import { GUILD } from '../botConfig.js';
+import { log } from '../lib/logging.js';
+import type { EventDefinition } from './+type.js';
 
 
 export default (() => {

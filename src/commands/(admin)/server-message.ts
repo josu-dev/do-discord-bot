@@ -1,8 +1,8 @@
 import { APIEmbed, Attachment, channelMention, ChannelType, SlashCommandBuilder } from 'discord.js';
-import { SingleFileCommandDefinition } from '../+type';
-import { GUILD } from '../../botConfig';
-import { schema } from '../../lib';
-import { log } from '../../lib/logging';
+import { SingleFileCommandDefinition } from '../+type.js';
+import { GUILD } from '../../botConfig.js';
+import { schema } from '../../lib/index.js';
+import { log } from '../../lib/logging.js';
 
 
 const MAX_EMBED_OPTIONS = 5;

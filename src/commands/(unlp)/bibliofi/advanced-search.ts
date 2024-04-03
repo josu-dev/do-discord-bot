@@ -1,7 +1,7 @@
 import { APIApplicationCommandOptionChoice, SlashCommandSubcommandBuilder } from 'discord.js';
-import { SubCommandDefinition, documentTypes, customLibrarySearch, SearchOptions } from './+command';
-import { documentsReply } from './search';
-import { addEphemeralOption } from '../../../lib/discordjs';
+import { addEphemeralOption } from '../../../lib/discordjs.js';
+import { SearchOptions, SubCommandDefinition, customLibrarySearch, documentTypes } from './+command.js';
+import { documentsReply } from './search.js';
 
 
 const commandData = new SlashCommandSubcommandBuilder()

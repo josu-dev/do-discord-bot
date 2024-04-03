@@ -1,6 +1,6 @@
 import { SlashCommandSubcommandBuilder, userMention } from 'discord.js';
-import { SubCommandDefinition, Pomodoro, pomodoroEvent } from './+command';
-import { tsToRawHsMinS } from '../../../lib';
+import { tsToRawHsMinS } from '../../../lib/index.js';
+import { Pomodoro, SubCommandDefinition, pomodoroEvent } from './+command.js';
 
 
 export default ((runningPomodoros) => {

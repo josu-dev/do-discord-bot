@@ -1,7 +1,7 @@
 import { APIEmbed, SlashCommandSubcommandBuilder } from 'discord.js';
-import { SubCommandDefinition } from './+command';
-import { LinksGroup, embedFromLinksGroups } from './+skip.shared';
-import { addEphemeralOption } from '../../../lib/discordjs';
+import { addEphemeralOption } from '../../../lib/discordjs.js';
+import { SubCommandDefinition } from './+command.js';
+import { LinksGroup, embedFromLinksGroups } from './+skip.shared.js';
 
 
 const linksInformatica: LinksGroup[] = [

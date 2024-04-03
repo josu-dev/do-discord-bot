@@ -1,7 +1,7 @@
 import { APIApplicationCommandOptionChoice, APIEmbed, SlashCommandSubcommandBuilder } from 'discord.js';
-import { SubCommandDefinition } from './+command';
-import { StudentGroupsNames, studenGroupsEmbeds, studentGroups } from './+skip.shared';
-import { addEphemeralOption } from '../../../lib/discordjs';
+import { addEphemeralOption } from '../../../lib/discordjs.js';
+import { SubCommandDefinition } from './+command.js';
+import { StudentGroupsNames, studenGroupsEmbeds, studentGroups } from './+skip.shared.js';
 
 
 const allStudentGroupsReply: { embeds: APIEmbed[]; ephemeral: boolean; content: string; } = {

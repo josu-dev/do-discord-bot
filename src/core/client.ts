@@ -1,13 +1,13 @@
 import { Client, Collection } from 'discord.js';
-import { CLIENT } from '../botConfig';
-import { botToken } from '../enviroment';
-import { log } from '../lib/logging';
-import { MutableArray } from '../lib/utilType';
-import { registerCommands, type SlashCommandTrait } from './command';
-import { registerEvents } from './event';
-import { registerSelectMenus } from './selectMenu';
-import { SelectMenuTrait } from './selectMenu/type';
-import { ProgramTaskData, ScheduleTaskData } from './types';
+import { CLIENT } from '../botConfig.js';
+import { botToken } from '../enviroment.js';
+import { log } from '../lib/logging.js';
+import { MutableArray } from '../lib/utilType.js';
+import { registerCommands, type SlashCommandTrait } from './command/index.js';
+import { registerEvents } from './event/index.js';
+import { registerSelectMenus } from './selectMenu/index.js';
+import { SelectMenuTrait } from './selectMenu/type.js';
+import { ProgramTaskData, ScheduleTaskData } from './types.js';
 
 
 type RegisteredTask = { callback: (...args: any) => void; id: number | NodeJS.Timeout; };

@@ -1,12 +1,12 @@
 import fs from 'fs';
-import { INTERACTION } from '../../botConfig';
-import { f } from '../../lib';
-import { readJSON, writeJSON } from '../../lib/file';
-import { log } from '../../lib/logging';
-import { ExtendedClient } from '../client';
-import { CACHE_NAME_SUFFIX, config } from './config';
-import { autoRol } from './menus';
-import { DefaultSelectMenuModule, DynamicConfig, SelectMenuTrait } from './type';
+import { INTERACTION } from '../../botConfig.js';
+import { readJSON, writeJSON } from '../../lib/file.js';
+import { f } from '../../lib/index.js';
+import { log } from '../../lib/logging.js';
+import { ExtendedClient } from '../client.js';
+import { CACHE_NAME_SUFFIX, config } from './config.js';
+import { autoRol } from './menus/index.js';
+import { DefaultSelectMenuModule, DynamicConfig, SelectMenuTrait } from './type.js';
 
 
 const menuMap = {
@@ -93,7 +93,7 @@ async function processMenusDirectory(baseDir: f.EntryDirectory) {
 
 async function loadMenus() {
     const MENUS_ABS_DIR = f.posixJoin(
-        ...f.splitEntrys(__dirname), '..', '..', INTERACTION.SELECT_MENUS.path
+        ...f.splitEntrys(import.meta.dirname), '..', '..', INTERACTION.SELECT_MENUS.path
     );
     const menusDir = f.deepScan({
         absolutePath: MENUS_ABS_DIR,
@@ -143,7 +143,7 @@ export async function registerSelectMenus(client: ExtendedClient): Promise<void>
 
 export async function dynamicRegisterSelectMenu<T extends DynamicConfig>(client: ExtendedClient, data: T) {
     const GENERATED_ABS_DIR = f.posixJoin(
-        ...f.splitEntrys(__dirname), '..', '..', INTERACTION.SELECT_MENUS.path, config.generated.literalName, data.customId + CACHE_NAME_SUFFIX
+        ...f.splitEntrys(import.meta.dirname), '..', '..', INTERACTION.SELECT_MENUS.path, config.generated.literalName, data.customId + CACHE_NAME_SUFFIX
     );
     data.cachePath = GENERATED_ABS_DIR;
 

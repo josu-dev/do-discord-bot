@@ -1,6 +1,6 @@
 import { channelMention, ChannelType, GuildBasedChannel, SlashCommandBuilder } from 'discord.js';
-import { SingleFileCommandDefinition } from '../+type';
-import { log } from '../../lib/logging';
+import { SingleFileCommandDefinition } from '../+type.js';
+import { log } from '../../lib/logging.js';
 
 
 const commandData = new SlashCommandBuilder()

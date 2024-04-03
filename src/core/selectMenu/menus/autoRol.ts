@@ -1,9 +1,9 @@
 import { APIEmbed, Role } from 'discord.js';
 import { z } from 'zod';
-import { log } from '../../../lib/logging';
-import { embedSchema } from '../../../lib/schema';
-import { DefaultSelectMenuDefinition, ExtendBaseConfig } from '../type';
-import { baseConfigSchema, customIdSchema } from './shared';
+import { log } from '../../../lib/logging.js';
+import { embedSchema } from '../../../lib/schema.js';
+import { DefaultSelectMenuDefinition, ExtendBaseConfig } from '../type.js';
+import { baseConfigSchema, customIdSchema } from './shared.js';
 
 
 export const TYPE_ID = `PICK_ROLES`;

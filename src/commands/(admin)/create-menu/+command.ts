@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { MultiFileCommandDefinition, BaseSubCommandDefinition } from '../../+type';
+import { MultiFileCommandDefinition, BaseSubCommandDefinition } from '../../+type.js';
 
 
 export type SubCommandDefinition = BaseSubCommandDefinition<[]>;

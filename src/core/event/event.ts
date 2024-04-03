@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { f } from '../../lib';
-import { log } from '../../lib/logging';
-import { ExtendedClient } from '../client';
-import type { EventCallback, EventModule, EventNames } from './type';
+import { f } from '../../lib/index.js';
+import { log } from '../../lib/logging.js';
+import { ExtendedClient } from '../client.js';
+import type { EventCallback, EventModule, EventNames } from './type.js';
 
 
 const eventSchema = z.object({
@@ -39,7 +39,7 @@ class Event<N extends EventNames> {
 
 export async function registerEvents(client: ExtendedClient): Promise<void> {
     const EVENTS_ABS_DIR = f.posixJoin(
-        ...f.splitEntrys(__dirname), '..', '..', 'events'
+        ...f.splitEntrys(import.meta.dirname), '..', '..', 'events'
     );
 
     const eventsToLoad = f.deepList({

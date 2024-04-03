@@ -1,9 +1,9 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { SingleFileCommandDefinition } from '../+type';
-import { GUILD } from '../../botConfig';
-import { dev } from '../../enviroment';
-import { dateAsArg } from '../../lib';
-import { jsonCodeblock } from '../../lib/discordjs';
+import { SingleFileCommandDefinition } from '../+type.js';
+import { GUILD } from '../../botConfig.js';
+import { dev } from '../../enviroment.js';
+import { jsonCodeblock } from '../../lib/discordjs.js';
+import { dateAsArg } from '../../lib/index.js';
 
 
 const VERIFIED_ROLE_ID = dev ? '1133933055422246914' : GUILD.ROLES.VERIFIED;

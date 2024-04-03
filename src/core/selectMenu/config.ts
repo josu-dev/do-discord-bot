@@ -1,4 +1,4 @@
-import { EntryConfigDefinition } from '../sharedType';
+import { EntryConfigDefinition } from '../sharedType.js';
 
 
 export const CACHE_NAME_SUFFIX = '.cache.json';

@@ -1,5 +1,5 @@
 // Replace with './+type' as the path when copying
-import { EventDefinition } from './type';
+import { EventDefinition } from './type.js';
 
 
 export default (() => {

@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
-import { log } from '../../../lib/logging';
-import { RecordToTuple } from '../../../lib/utilType';
+import { log } from '../../../lib/logging.js';
+import { RecordToTuple } from '../../../lib/utilType.js';
 
 
 const BASE_URL = `http://catalogo.info.unlp.edu.ar`;

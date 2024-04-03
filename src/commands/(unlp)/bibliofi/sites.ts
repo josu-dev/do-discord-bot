@@ -1,7 +1,7 @@
 import { APIEmbed, SlashCommandSubcommandBuilder, bold, hideLinkEmbed, hyperlink, italic } from 'discord.js';
-import { SubCommandDefinition } from './+command';
-import { addEphemeralOption } from '../../../lib/discordjs';
-import { INFORMATICA } from '../+skip.config';
+import { INFORMATICA } from '../+skip.config.js';
+import { addEphemeralOption } from '../../../lib/discordjs.js';
+import { SubCommandDefinition } from './+command.js';
 
 
 type LinksGroup = {

@@ -1,5 +1,5 @@
 import { Client, ClientEvents } from 'discord.js';
-import { ExtendedClient } from '../client';
+import { ExtendedClient } from '../client.js';
 
 
 export type EventNames = keyof ClientEvents;

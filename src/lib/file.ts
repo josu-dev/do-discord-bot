@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { z } from 'zod';
 
-import * as tu from './utilType';
+import * as tu from './utilType.js';
 
 
 export function splitEntrys(absolutePath: string) {
@@ -367,7 +367,10 @@ export async function importModule<T extends unknown>(filePath: string, schema?:
             success: false,
             error: importErrors.pathError
         };
-
+    
+    if (/\w+:\//.test(filePath)) {
+        filePath = `file://${filePath}`
+    }
     const rawModule = await import(filePath).catch(error => ({ _isError: true, error }));
     if (!rawModule)
         return {
@@ -408,6 +411,9 @@ export async function importModuleWithZod<T extends unknown>(filePath: string, s
             error: importErrors.pathError
         };
 
+    if (/\w+:\//.test(filePath)) {
+        filePath = `file://${filePath}`
+    }
     const rawModule = await import(filePath).catch(error => ({ _isError: true, error }));
     if (!rawModule || rawModule._isError)
         return {

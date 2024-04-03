@@ -1,7 +1,7 @@
 import { channelMention, ChannelType, Collection, ForumLayoutType, PermissionFlagsBits, SlashCommandBuilder, TextChannel, ThreadAutoArchiveDuration } from 'discord.js';
-import { SingleFileCommandDefinition } from '../+type';
-import { REPLY } from '../../botConfig';
-import { log } from '../../lib/logging';
+import { SingleFileCommandDefinition } from '../+type.js';
+import { REPLY } from '../../botConfig.js';
+import { log } from '../../lib/logging.js';
 
 
 const GUILD_CATEGORY = [ChannelType.GuildCategory] satisfies [ChannelType];

@@ -1,6 +1,6 @@
 import { SlashCommandSubcommandBuilder, codeBlock, hyperlink } from 'discord.js';
-import { SubCommandDefinition } from './+command';
-import { addEphemeralOption } from '../../../lib/discordjs';
+import { addEphemeralOption } from '../../../lib/discordjs.js';
+import { SubCommandDefinition } from './+command.js';
 
 
 const commandData = new SlashCommandSubcommandBuilder()
