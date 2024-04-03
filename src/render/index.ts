@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 import fs from "fs";
-import { log } from '../lib/logging';
+import { log } from '../lib/logging.js';
 
 
 const DEFAULT_HTML = `<!DOCTYPE html>
@@ -36,13 +36,12 @@ try {
 
 const PORT = process.env.PORT || 3001;
 
-let app: typeof express;
+let app: express.Express;
 
 
 function initWebServer() {
     app = express();
 
-    // @ts-expect-error
     app.get("/", (req, res) => res.type('html').send(html));
 
     const server = app.listen(PORT, () => {
