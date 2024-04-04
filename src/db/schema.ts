@@ -19,6 +19,8 @@ export const ServerStats = sqliteTable("server_stats", {
     members_count: integer("members_count").default(0).notNull(),
     members_online: integer("members_online").default(0).notNull(),
     members_connected: integer("members_connected").default(0).notNull(),
+    members_last_day: integer("members_last_day", { mode: "number" }).default(0).notNull(),
+    members_last_week: integer("members_last_week", { mode: "number" }).default(0).notNull(),
 }, (t) => ({
     guild_id_idx: uniqueIndex('guild_id_idx').on(t.guild_id)
 }));

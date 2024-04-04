@@ -12,7 +12,7 @@ export const INTERACTION = {
 } as const;
 
 export const CLIENT = {
-    INTENTS: [GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildModeration, GatewayIntentBits.GuildPresences, GatewayIntentBits.Guilds],
+    INTENTS: [GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildModeration, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.Guilds],
     PARTIALS: [Partials.Channel, Partials.Message, Partials.Reaction],
 } as const;
 

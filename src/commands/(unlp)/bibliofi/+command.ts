@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { MultiFileCommandDefinition, SubCommandDefinitionFrom } from '../../+type.js';
-export { SearchOptions, SearchResult, documentTypes, librarySearch, customLibrarySearch } from '../../../plugins/scrapers/bibliofi/libraryScraper.js';
-
+export { customLibrarySearch, documentTypes, librarySearch } from '../../../plugins/scrapers/bibliofi/libraryScraper.js';
+export type { SearchOptions, SearchResult } from '../../../plugins/scrapers/bibliofi/libraryScraper.js';
 
 const baseCommand = (() => {
     return {

@@ -6,22 +6,21 @@ import type { EventDefinition } from './+type.js';
 export default (() => {
     return {
         once: false,
-        name: `presenceUpdate`,
+        name: `voiceStateUpdate`,
         description: `Welcome message for new members`,
-        async response(client, oldPresence, newPresence) {
-            if (newPresence.user?.bot) {
+        async response(client, oldVoice, newVoice) {
+            if (newVoice.member?.user.bot) {
                 return;
             }
 
-            let updatePresence = oldPresence?.status !== newPresence.status;
-            if (!updatePresence || !newPresence.guild) {
+            if (oldVoice.channelId === newVoice.channelId || !newVoice.guild) {
                 return;
             }
 
-            const update = await updateServerStats(db, newPresence.guild);
+            const update = await updateServerStats(db, newVoice.guild);
             if (!update.success) {
                 log.error(update.message, update.error);
             }
         }
     };
-}) satisfies EventDefinition<'presenceUpdate'>;
+}) satisfies EventDefinition<'voiceStateUpdate'>;
