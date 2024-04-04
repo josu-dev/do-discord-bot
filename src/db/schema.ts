@@ -3,7 +3,7 @@ import { integer, sqliteTable, text, unique, uniqueIndex } from "drizzle-orm/sql
 export const Member = sqliteTable("member", {
     id: text("id").primaryKey(),
     guild_id: text("guild_id").notNull(),
-    member_id: text("user_id").notNull(),
+    member_id: text("member_id").notNull(),
     legajo: text("legajo"),
     dni: text("dni")
 }, (t) => ({
@@ -15,7 +15,7 @@ export const Member = sqliteTable("member", {
 export const ServerStats = sqliteTable("server_stats", {
     id: text("id").primaryKey(),
     guild_id: text("guild_id").unique().notNull(),
-    bots_count: integer("bot_count").default(0).notNull(),
+    bots_count: integer("bots_count").default(0).notNull(),
     members_count: integer("members_count").default(0).notNull(),
     members_online: integer("members_online").default(0).notNull(),
     members_connected: integer("members_connected").default(0).notNull(),
