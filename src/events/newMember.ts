@@ -1,7 +1,7 @@
 import { spoiler, userMention } from 'discord.js';
-import { nanoid } from 'nanoid';
 import { GUILD } from '../botConfig.js';
-import { ServerStats, db } from '../db/index.js';
+import { updateServerStats } from '../db/functions.js';
+import { db } from '../db/index.js';
 import { dev } from '../enviroment.js';
 import { log } from '../lib/logging.js';
 import type { EventDefinition } from './+type.js';
@@ -59,36 +59,9 @@ export default (() => {
                 }
             }
 
-            let totalMembers = 0;
-            let totalOnline = 0;
-            let totalBots = 0;
-            for (const m of member.guild.members.cache.values()) {
-                totalMembers++;
-                if (m.presence?.status !== 'offline') {
-                    totalOnline++;
-                }
-                if (m.user.bot) {
-                    totalBots++;
-                }
-            }
-            try {
-                await db.insert(ServerStats).values([{
-                    id: nanoid(),
-                    guild_id: member.guild.id,
-                    bots_count: totalBots,
-                    members_count: totalMembers,
-                    members_online: totalOnline,
-                }]).onConflictDoUpdate({
-                    target: [ServerStats.guild_id],
-                    set: {
-                        bots_count: totalBots,
-                        members_count: totalMembers,
-                        members_online: totalOnline,
-                    }
-                });
-            }
-            catch (error) {
-                log.error(`Error updating server stats on guildMemberAdd event for guild ${member.guild.id}\n`, error);
+            const update = await updateServerStats(db, member.guild);
+            if (!update.success) {
+                log.error(update.message, update.error);
             }
         }
     };
